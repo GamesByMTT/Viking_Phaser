@@ -19,7 +19,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
     freeSpinText!: TextLabel;
     pBtn!: Phaser.GameObjects.Sprite;
     mBtn!: Phaser.GameObjects.Sprite
-    private isAutoSpinning: boolean = false; // Flag to track if auto-spin is active
+    public isAutoSpinning: boolean = false; // Flag to track if auto-spin is active
     mainScene!: Phaser.Scene
     fireSprite1!: Phaser.GameObjects.Sprite
     fireSprite2!: Phaser.GameObjects.Sprite
@@ -122,40 +122,6 @@ export class UiContainer extends Phaser.GameObjects.Container {
         this.currentBalanceText = new TextLabel(this.scene, 0, 7, currentGameData.currentBalance.toFixed(2), 27, "#ffffff");
         container.add(this.currentBalanceText);
     }
-    /**
-     * @method vaseInit add the vase Sprite
-     * @description this method adds the vase sprite on left and right of thre frame and create the fireanimation on respective both vase 1 and vase 2 but hide them initially
-     */
-    vaseInit() {
-        const vase1 = this.scene.add.sprite(0, 0, 'fireVase');
-        vase1.setOrigin(0.5);
-        vase1.setPosition(vase1.width * 1.70, gameConfig.scale.height - vase1.height * 1.80);
-        // const fire1 = this.addFire(this.scene, vase1.x, vase1.y - vase1.height);
-        const fireFrames = [];
-        for(let i = 0; i<=22; i++){
-            fireFrames.push({ key: `fire_${i}` });
-        }
-        this.scene.anims.create({
-            key: 'fireAnimation',
-            frames: fireFrames,
-            frameRate: 12,
-            repeat: -1 // Loop the animation
-        });
-
-        this.fireSprite1 = this.scene.add.sprite(vase1.x, vase1.y - vase1.height, 'fire_1');
-        this.fireSprite1.setVisible(false); // Hide the sprite initially
-    
-        const vase2 = this.scene.add.sprite(0, 0, 'fireVase');
-        vase2.setOrigin(0.5);
-        vase2.setPosition(gameConfig.scale.width - vase2.width * 1.70, gameConfig.scale.height - vase2.height * 1.80);
-        // const fire2 = this.addFire(this.scene, vase2.x, vase2.y - vase2.height);
-        this.fireSprite2 = this.scene.add.sprite(vase2.x, vase2.y - vase2.height, 'fire_1');
-        this.fireSprite2.setVisible(false); // Hide the sprite initially
-    
-        this.add(vase1);
-        this.add(vase2);
-    }
-
 /**
      * @method spinBtnInit Spin the reel
      * @description this method is used for creating and spin button and on button click the a SPIn emit will be triggered to socket and will deduct the amout according to the bet
@@ -164,7 +130,6 @@ spinBtnInit(spinCallBack: () => void) {
     this.spinBtn = new Phaser.GameObjects.Sprite(this.scene, 0, 0, "spinBtn");
     this.spinBtn = this.createButton('spinBtn', gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1, () => {
         // checking if autoSpining is working or not if it is auto Spining then stop it
-        // this.startFireAnimation();
         if(this.isAutoSpinning){
             this.autoBetBtn.emit('pointerdown'); // Simulate the pointerdown event
             this.autoBetBtn.emit('pointerup'); // Simulate the pointerup event (if needed)
@@ -327,20 +292,12 @@ spinBtnInit(spinCallBack: () => void) {
      */
     freeSpininit(freeSpinNumber: number){
         console.log("freeSpinNumber", freeSpinNumber);
-        
         if(freeSpinNumber >= 1){
             const freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
-            const freeSpinBg = this.scene.add.sprite(freeSpinContainer.x, freeSpinContainer.y, "balancePanel");
-            const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x, freeSpinBg.y - 17, "Free Spin : ", 35, "#ffffff");
-            this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 90, freeSpinBg.y - 17, freeSpinNumber.toString(), 35, "#ffffff")
+            const freeSpinBg = this.scene.add.sprite(freeSpinContainer.x, freeSpinContainer.y, "normalButton").setScale(0.8, 0.5);
+            const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
+            this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
             this.freeSpinBgImg = freeSpinBg
-        }else{
-            // if(this.freeSpinBgImg){
-            //     this.freeSpinBgImg.setVisible(false)
-            // }
-            // if( this.freeSpinText){
-            //     this.freeSpinText.setVisible(false)
-            // }
         }
     }
     /**

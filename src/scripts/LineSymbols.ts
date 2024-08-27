@@ -23,19 +23,21 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
     }
 
     createNumber(scene: Phaser.Scene, index: number): Phaser.GameObjects.Text {
+        let numberContainer = new Phaser.GameObjects.Container(scene);
         let xPosition;
+        
         let yPosition = 0;
-        let numberBg = scene.add.sprite(0, 0, "lineSymbols").setDepth(10)
+        let numberBg = scene.add.sprite(0, 0, "lineSymbols")
         // Determine x position based on even or odd index
         if (index % 2 === 0) {
             // Even numbers (0, 2, 4, 6, 8, etc.) go on one side
             xPosition = - gameConfig.scale.width/3.75;
-            yPosition = (index / 2) * 50 - 100;  // Staggered downwards for each even number
+            yPosition = (index / 2) * 60 - 150;  // Staggered downwards for each even number
             numberBg.setPosition(gameConfig.scale.width/4.3, yPosition + 380);
         } else {
             // Odd numbers (1, 3, 5, 7, 9, etc.) go on the opposite side
             xPosition = gameConfig.scale.width/3.79;
-            yPosition =  ((index - 1) / 2) * 50 - 100;  // Staggered downwards for each odd number
+            yPosition =  ((index - 1) / 2) * 60 - 150;  // Staggered downwards for each odd number
             numberBg.setPosition(gameConfig.scale.width / 1.31, yPosition + 380)
         }
 
@@ -43,13 +45,17 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
         let numberText = scene.add.text(xPosition, yPosition, (index + 1).toString(), {
             font: "24px",
             color: "#ffffff",
-            align: 'center',
-        }).setOrigin(0.5, 0.5).setDepth(10);
+            align: 'center',    
+        }).setOrigin(0.5, 0.5).setDepth(12);
         // Enable input on the number text
         numberText.setInteractive({ useHandCursor: true }).setDepth(5);
+        
         // Add hover event listeners
         numberText.on("pointerover", () => this.showLines(index));
         numberText.on("pointerout", () => this.hideLines());
+
+
+        // numberText.on("pointerup", () => this.hideLines());
 
         return numberText;
     }
