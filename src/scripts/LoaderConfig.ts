@@ -28,6 +28,8 @@ export const LoaderConfig = {
     exitButton: "src/sprites/ExitButton.png",
     exitButtonPressed: "src/sprites/ExitButtonHover.png",
     popupBgimg: "src/sprites/AboutPanel.png",
+    messagePopup: "src/sprites/messagepopup.png",
+    normalButton: "src/sprites/NormalButton.png",
 
     logo: "src/sprites/vikingsLogo.png",
     assetsloader: "src/sprites/assetsLoader.png",
@@ -37,6 +39,8 @@ export const LoaderConfig = {
     column: "src/sprites/columnLeft.png",
     snow: "src/sprites/Snow.png",
     roof:"src/sprites/Roof.png",
+    winLine: "src/sprites/WinLine.png",
+    lineSymbols: "src/sprites/LineSymbols.png",
     
     slots0_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots0_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",

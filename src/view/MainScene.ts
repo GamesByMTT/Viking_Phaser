@@ -1,9 +1,10 @@
 import { Scene, GameObjects, Scale } from 'phaser';
 import { Slots } from '../scripts/Slots';
 import { UiContainer } from '../scripts/UiContainer';
-import { LineGenerator } from '../scripts/Lines';
+import { LineGenerator, Lines } from '../scripts/Lines';
 import { UiPopups } from '../scripts/UiPopup';
-import { Globals, ResultData, currentGameData } from '../scripts/Globals';
+import LineSymbols from '../scripts/LineSymbols';
+import { Globals, ResultData, currentGameData, initData } from '../scripts/Globals';
 
 export default class MainScene extends Scene {
     slot!: Slots;
@@ -17,6 +18,7 @@ export default class MainScene extends Scene {
     lineGenerator!: LineGenerator;
     uiContainer!: UiContainer;
     uiPopups!: UiPopups;
+    lineSymbols!: LineSymbols
     private mainContainer!: Phaser.GameObjects.Container;
     fireSprite!: Phaser.GameObjects.Sprite;
 
@@ -33,13 +35,13 @@ export default class MainScene extends Scene {
         this.mainContainer = this.add.container();
 
         // Set up the stairs frame
-        
-        this.reelBg = new Phaser.GameObjects.Sprite(this, width/2, height/2.2, 'reelBg')
-        this.roofTop = new Phaser.GameObjects.Sprite(this, width/2, height * 0.11, 'roof')
+        this.stairs = new Phaser.GameObjects.Sprite(this, width/2, height/1.08, 'stairs').setDepth(0)
+        this.reelBg = new Phaser.GameObjects.Sprite(this, width/2, height/2.2, 'reelBg').setDepth(0)
+        this.roofTop = new Phaser.GameObjects.Sprite(this, width/2, height * 0.11, 'roof').setDepth(2)
         this.columnleft = new Phaser.GameObjects.Sprite(this, width/4.3, height/2.2, 'column').setDepth(1)
         this.columnRight = new Phaser.GameObjects.Sprite(this, width/1.31, height/2.2, 'column').setDepth(1)
         this.snow = new Phaser.GameObjects.Sprite(this, width/2, height/2.4, 'snow').setScale(0.9, 1)
-        this.stairs = new Phaser.GameObjects.Sprite(this, width/2, height/1.08, 'stairs').setDepth(2)
+        
         this.mainContainer.add([this.reelBg, this.roofTop, this.columnleft, this.columnRight, this.snow, this.stairs])
 
         // Initialize UI Container
@@ -58,19 +60,9 @@ export default class MainScene extends Scene {
         this.uiPopups = new UiPopups(this, this.uiContainer);
         this.mainContainer.add(this.uiPopups)
 
-        // for Mobile fullScreen onclick
-        // if (this.sys.game.device.os.android) {
-        //     // Add event listener for click or touch to trigger fullscreen
-        //     this.input.on('pointerdown', async () => {
-        //         if (!this.scale.isFullscreen) {
-        //             try {
-        //                 await this.scale.startFullscreen();
-        //             } catch (error) {
-        //                 console.error('Failed to enter fullscreen mode:', error);
-        //             }
-        //         }
-        //     });
-        // }    
+        // Initialize LineSymbols
+        this.lineSymbols = new LineSymbols(this, 10, 12, this.lineGenerator)
+        this.mainContainer.add(this.lineSymbols)
     }
 
     update(time: number, delta: number) {
@@ -104,8 +96,13 @@ export default class MainScene extends Scene {
     recievedMessage(msgType: string, msgParams: any) {
         if (msgType === 'ResultData') {
             this.time.delayedCall(1000, () => {
+                console.log(currentGameData, "currentGameData");
+                
                 this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toString());
                 currentGameData.currentBalance = ResultData.playerData.Balance;
+                let betValue = initData.gameData.Bets[currentGameData.currentBetIndex]
+                console.log();
+                
                 this.uiContainer.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
                 const freeSpinCount = ResultData.gameData.freeSpins.count;
                 // Check if freeSpinCount is greater than 1
