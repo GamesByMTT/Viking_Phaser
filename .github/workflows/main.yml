@@ -3,7 +3,7 @@ name: Phaser Build And Deploy 🎰
 on:
   push:
     branches:
-      - "dev-arpit"
+      - "dev-Arpit"
   workflow_dispatch:
 
 permissions:
@@ -17,7 +17,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: dev-arpit
+          ref: dev-Arpit
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
