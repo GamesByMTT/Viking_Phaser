@@ -23,8 +23,8 @@ if(!IS_DEV){
 }
 else{
   const data  = {
-    socketUrl : "https://dev.casinoparadize.com/",
-    authToken : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YzU4M2RkMWJkNzI4Zjg3YTM0ZWQ2OSIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzI0MjIwNDA2LCJleHAiOjE3MjQ4MjUyMDZ9.z6SvMAQLF_CTI1WZdNfCWvxHFF91U8tjwsogLAOkEY4",
+    socketUrl : "https://game-crm-rtp-backend.onrender.com/",
+    authToken : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YzU4M2RkMWJkNzI4Zjg3YTM0ZWQ2OSIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzI0ODIzNTU5LCJleHAiOjE3MjU0MjgzNTl9.44XaAN09oapDet8ZV847JZqMJ-v8Z2O0nPjJM7NSB88",
   }
   Globals.Socket = new SocketManager();
   Globals.Socket.onToken(data);

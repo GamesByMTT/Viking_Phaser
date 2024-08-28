@@ -5,7 +5,7 @@ import MainLoader from "./view/MainLoader";
 
 // const socketUrl = process.env.SOCKET_URL || ""
 export class SocketManager {
-  private socket : any;
+  public socket : any;
   public authToken : string = "";
   public SocketUrl : string= "";
   public socketLoaded : boolean = false;
@@ -57,6 +57,7 @@ export class SocketManager {
             // this.onInitDataReceived()
             initData.gameData = data.message.GameData;
             initData.playerData = data.message.PlayerData;
+            initData.gameData.BonusData = data.message.BonusData;
             console.log(data, "initData on Socket File");
             Globals.SceneHandler?.addScene("MainLoader", MainLoader, true)
         }

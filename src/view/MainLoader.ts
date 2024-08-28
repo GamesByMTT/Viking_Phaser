@@ -94,7 +94,7 @@ export default class MainLoader extends Scene {
         this.completeLoading();
         setTimeout(() => {
             // Use SceneHandler to manage scenes   
-            Globals.SceneHandler?.addScene('MainScene', MainScene, true)
+            Globals.SceneHandler?.addScene('BonusScene', MainScene, true)
         }, 500);
     }
 }

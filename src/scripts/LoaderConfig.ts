@@ -36,6 +36,7 @@ export const LoaderConfig = {
     jackpotPopup: "src/sprites/jackpotPopup.png",
     freeSpinPopup: "src/sprites/FreeSpinPopup.png",
     freeSpinStartButton: "src/sprites/freeSpinStartButton.png",
+    freeSpinStartButtonPressed: "src/sprites/SpinButtonPressed.png",
     spinCircle: "src/sprites/SpinCircle.png",
     spinCenter: "src/sprites/SpinCenter.png",
     wheelBg: "src/sprites/WheelBg.png",
@@ -50,6 +51,9 @@ export const LoaderConfig = {
     roof:"src/sprites/Roof.png",
     winLine: "src/sprites/WinLine.png",
     lineSymbols: "src/sprites/LineSymbols.png",
+    settingPopup:"src/sprites/settingPopup.png",
+    soundImage:"src/sprites/Sounds.png",
+    musicImage: "src/sprites/Music.png",
     
     slots0_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots0_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",

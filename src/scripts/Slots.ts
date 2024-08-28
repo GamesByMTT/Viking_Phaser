@@ -47,33 +47,31 @@ export class Slots extends Phaser.GameObjects.Container {
         this.symbolWidth = exampleSymbol.displayWidth/ 4;
         this.symbolHeight = exampleSymbol.displayHeight/4;
         this.spacingX = this.symbolWidth * 1.9; // Add some spacing
-        this.spacingY = this.symbolHeight * 1.7; // Add some spacing
+        this.spacingY = this.symbolHeight * 1.8; // Add some spacing
         const startPos = {
             x: gameConfig.scale.width / 3.1,
-            y: gameConfig.scale.height /3.2     
+            y: gameConfig.scale.height /3.25     
         };
         for (let i = 0; i < 5; i++) { // 5 columns
             const reelContainer = new Phaser.GameObjects.Container(scene);
             this.reelContainers.push(reelContainer); // Store the container for future use
             
             this.slotSymbols[i] = [];
-            for (let j = 0; j < 3; j++) { // 3 rows
+            for (let j = 0; j < 23; j++) { // 3 rows
                 let symbolKey = this.getRandomSymbolKey(); // Get a random symbol key
                 let slot = new Symbols(scene, symbolKey, { x: i, y: j });
-                
                 slot.symbol.setMask(new Phaser.Display.Masks.GeometryMask(scene, this.slotMask));
                 slot.symbol.setPosition(
-                    startPos.x + i * this.spacingX ,
+                    startPos.x + i * this.spacingX,
                     startPos.y + j * this.spacingY
                 );
-                slot.symbol.setScale(0.48, 0.48)
+                slot.symbol.setScale(0.45, 0.45)
                 slot.startX = slot.symbol.x;
                 slot.startY = slot.symbol.y;
                 this.slotSymbols[i].push(slot);
-                // this.add(slot.symbol);
                 reelContainer.add(slot.symbol)
             }
-            this.add(reelContainer);
+            this.add(reelContainer); 
         }
     }
 
@@ -100,7 +98,7 @@ export class Slots extends Phaser.GameObjects.Container {
         return this.symbolKeys[randomIndex];
     }
 
-    moveReel() {
+    moveReel() {      
         for (let i = 0; i < this.slotSymbols.length; i++) {
             for (let j = 0; j < this.slotSymbols[i].length; j++) {
                 setTimeout(() => {
@@ -115,6 +113,8 @@ export class Slots extends Phaser.GameObjects.Container {
 
     stopTween() {
         // Calculate the maximum delay for endTween
+        console.log(this.slotSymbols.length , "this.slotSymbols.length ");
+        
         const maxDelay = 200 * (this.slotSymbols.length - 1);
         // Use a single timeout for resultCallBack, ensuring it's called only once after all endTweens
         setTimeout(() => {
@@ -144,34 +144,44 @@ export class Slots extends Phaser.GameObjects.Container {
                 }, 200 * i);
             }
         }
-        setTimeout(() => {
-            // this.uiContainer.stopFireAnimation();       
-        }, maxDelay + 200);
     }
+
+    // update(time: number, delta: number) {
+    //     if (this.slotSymbols && this.moveSlots) {
+    //         for (let i = 0; i < this.slotSymbols.length; i++) {
+    //             for (let j = 0; j < this.slotSymbols[i].length; j++) {
+    //                 this.slotSymbols[i][j].update(delta);
+    //                 if (this.slotSymbols[i][j].symbol.y + this.slotSymbols[i][j].symbol.displayHeight * 1.2 >=2000) {
+    //                     if (j === 0) {
+    //                         this.slotSymbols[i][j].symbol.y = this.slotSymbols[i][this.slotSymbols[i].length - 1].symbol.y - this.slotSymbols[i][this.slotSymbols[i].length - 1].symbol.displayHeight / 2;
+    //                     } else {
+    //                         // console.log("update else", this.slotSymbols[i][j].symbol.displayHeight, this.slotSymbols[i][j - 1].symbol.y);
+    //                         this.slotSymbols[i][j].symbol.y = this.slotSymbols[i][j - 1].symbol.y - this.slotSymbols[i][j].symbol.displayHeight;
+                            
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     update(time: number, delta: number) {
         if (this.slotSymbols && this.moveSlots) {
             for (let i = 0; i < this.slotSymbols.length; i++) {
                 for (let j = 0; j < this.slotSymbols[i].length; j++) {
                     this.slotSymbols[i][j].update(delta);
-                    if (
-                        this.slotSymbols[i][j].symbol.y +
-                            this.slotSymbols[i][j].symbol.displayHeight * 1.5 >=
-                        2000
-                    ) {
-                        if (j === 0) {
-                            this.slotSymbols[i][j].symbol.y =
-                                this.slotSymbols[i][this.slotSymbols[i].length - 1].symbol.y -
-                                this.slotSymbols[i][this.slotSymbols[i].length - 1].symbol.displayHeight / 2;
-                        } else {
-                            this.slotSymbols[i][j].symbol.y =
-                                this.slotSymbols[i][j - 1].symbol.y - this.slotSymbols[i][j].symbol.displayHeight;
-                        }
+                    // Check if the symbol is out of bounds (off the bottom)
+                    if (this.slotSymbols[i][j].symbol.y >= this.slotMask.y + this.maskHeight) {
+                        // Reposition the symbol to the top of the reel
+                        const lastSymbolIndex = this.slotSymbols[i].length - 1;
+                        const newY = this.slotSymbols[i][0].symbol.y - this.symbolHeight * 6; // Adjust to space out symbols correctly
+                        this.slotSymbols[i][j].symbol.y = newY;
                     }
                 }
             }
         }
     }
+    
 }
 
 // @Sybols CLass
@@ -193,10 +203,11 @@ class Symbols {
         this.isMobile = scene.sys.game.device.os.android || scene.sys.game.device.os.iOS;
         // Load textures and create animation
         const textures: string[] = [];
-        Globals.resources
         for (let i = 0; i < 23; i++) {
             textures.push(`${symbolKey}`);
-        }
+        }  
+        // console.log(textures, "textures");
+              
         this.scene.anims.create({
             key: `${symbolKey}`,
             frames: textures.map((texture) => ({ key: texture })),
@@ -217,16 +228,16 @@ class Symbols {
     playAnimation(animationId: any) {
         this.symbol.play(animationId)
     }
-      stopAnimation() {
+    stopAnimation() {
         this.symbol.anims.stop();
         this.symbol.setFrame(0);
-      }
+    }
       endTween() {
         if (this.index.y < 3) {
             let textureKeys: string[] = [];
             // Retrieve the elementId based on index
             const elementId = ResultData.gameData.ResultReel[this.index.y][this.index.x];
-                for (let i = 0; i < 23; i++) {
+                for (let i = 0; i <23; i++) {
                     const textureKey = `slots${elementId}_${i}`;
                     // Check if the texture exists in cache
                     if (this.scene.textures.exists(textureKey)) {
@@ -263,7 +274,7 @@ class Symbols {
       update(dt: number) {
         
         if (this.startMoving) {
-          const deltaY = 10 * dt;
+          const deltaY = 6* dt; 
           const newY = this.symbol.y + deltaY;  
           this.symbol.y = newY;         
         // Check if newY exceeds the maximum value

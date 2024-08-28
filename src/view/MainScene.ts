@@ -96,7 +96,7 @@ export default class MainScene extends Scene {
      */
     recievedMessage(msgType: string, msgParams: any) {
         if (msgType === 'ResultData') {
-            this.time.delayedCall(1000, () => {               
+            this.time.delayedCall(1000, () => {             
                 this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toString());
                 currentGameData.currentBalance = ResultData.playerData.Balance;
                 let betValue = (initData.gameData.Bets[currentGameData.currentBetIndex]) * 20
@@ -110,7 +110,7 @@ export default class MainScene extends Scene {
                     this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
                     this.uiContainer.freeSpininit(freeSpinCount)
                     // Update the label text
-                    this.uiContainer.freeSpinText.updateLabelText(freeSpinCount.toString());
+                    // this.uiContainer.freeSpinText.updateLabelText(freeSpinCount.toString());
                     // Define the tween animation for Scaling
                     this.tweens.add({
                         targets: this.uiContainer.freeSpinText,
@@ -140,16 +140,10 @@ export default class MainScene extends Scene {
                 }
                 this.slot.stopTween();
                 if (ResultData.gameData.BonusResult.length > 0) {
-                    // Pause the current scene
-                    // this.scene.pause();
+                    // Bonus Scene Called if Result length > 0
                     setTimeout(() => {
                         Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
                     }, 2000);
-                    // Launch a new scene for Bonus Game
-                    // this.scene.launch('BonusScene', { bonusData: ResultData.gameData.BonusResult });
-                    
-                    // Stop further processing in this method
-                    return;
                 }
             });
         }
@@ -220,8 +214,6 @@ export default class MainScene extends Scene {
             // Prevent default action on pointerdown to block interaction
             pointer.event.stopPropagation();
         });
-
-
         // Create the sprite based on the key provided
         const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, spriteKey).setDepth(11);
         if(!this.uiContainer.isAutoSpinning){

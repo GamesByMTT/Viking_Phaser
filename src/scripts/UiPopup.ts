@@ -16,6 +16,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
     noBtn!: InteractiveBtn
     isOpen: boolean = false;
     isExitOpen: boolean = false;
+    settingClose!: InteractiveBtn
     constructor(scene: Phaser.Scene, uiContainer: UiContainer) {
         super(scene);
         this.setPosition(0, 0);
@@ -58,6 +59,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         ];
         this.settingBtn = new InteractiveBtn(this.scene, settingBtnSprites, () => {
             // setting Button
+            this.openSettingPopup();
         }, 1, false); // Adjusted the position index
         this.settingBtn.setPosition(gameConfig.scale.width/ 2 - this.settingBtn.width * 5, this.settingBtn.height * 0.7);
         this.add(this.settingBtn);
@@ -134,6 +136,46 @@ export class UiPopups extends Phaser.GameObjects.Container {
         });
     }
     /**
+     * 
+     */
+    openSettingPopup(){
+        const settingblurGraphic = this.scene.add.graphics().setDepth(1); // Set depth lower than popup elements
+        settingblurGraphic.fillStyle(0x000000, 0.5); // Black with 50% opacity
+        settingblurGraphic.fillRect(0, 0, this.scene.scale.width, this.scene.scale.height); // Cover entire screen
+        const infopopupContainer = this.scene.add.container(
+            this.scene.scale.width / 2,
+            this.scene.scale.height / 2
+        ).setDepth(1)
+        // Popup background image
+        const popupBg = this.scene.add.image(0, 0, 'settingPopup').setDepth(9);
+        const soundsImage = this.scene.add.image(-200, -120, 'soundImage').setDepth(10)
+        const musicImage = this.scene.add.image(-200, 50, 'musicImage').setDepth(10)
+        const exitButtonSprites = [
+            this.scene.textures.get('exitButton'),
+            this.scene.textures.get('exitButtonPressed')
+        ];
+        this.settingClose  = new InteractiveBtn(this.scene, exitButtonSprites, ()=>{
+            infopopupContainer.destroy();
+            settingblurGraphic.destroy();
+        }, 0, true, );
+        this.settingClose.setPosition(350, -350).setScale(0.7)
+        // this.settingClose = this.scene.add.image(350, -350, "exitButton").setScale(0.7).setInteractive()
+       
+        popupBg.setOrigin(0.5);
+        popupBg.setScale(0.8)
+        popupBg.setAlpha(1); // Set background transparency
+        infopopupContainer.add([popupBg, this.settingClose, soundsImage, musicImage])
+    }
+
+    /**
+     * @method openinfo
+     */
+
+    openinfoPoup(){
+
+    }
+
+    /**
      * @method openLogoutPopup
      * @description creating an container for exitPopup 
      */
@@ -166,8 +208,8 @@ export class UiPopups extends Phaser.GameObjects.Container {
         ];
         this.yesBtn = new InteractiveBtn(this.scene, logoutButtonSprite, () => {
             this.UiContainer.onSpin(false);
-            Globals.Socket?.sendMessage("EXIT", {});
-            window.parent.postMessage("onExit", "*");
+            Globals.Socket?.socket.emit("EXIT", {});
+            // window.parent.postMessage("onExit", "*");
             popupContainer.destroy();
             blurGraphic.destroy(); // Destroy blurGraphic when popup is closed
         }, 0, true);

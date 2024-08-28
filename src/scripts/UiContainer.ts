@@ -24,6 +24,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
     fireSprite1!: Phaser.GameObjects.Sprite
     fireSprite2!: Phaser.GameObjects.Sprite
     betButtonDisable!: Phaser.GameObjects.Container
+    freeSpinContainer!: Phaser.GameObjects.Container
 
     constructor(scene: Scene, spinCallBack: () => void) {
         super(scene);
@@ -291,13 +292,22 @@ spinBtnInit(spinCallBack: () => void) {
      * @description this method is used for showing the number of freeSpin value at the top of reels
      */
     freeSpininit(freeSpinNumber: number){
-        console.log("freeSpinNumber", freeSpinNumber);
+        console.log("freeSpinNumber", freeSpinNumber, this.freeSpinBgImg);
+        if(freeSpinNumber == 0){
+            if(this.freeSpinBgImg){
+                this.freeSpinBgImg.destroy();
+                this.freeSpinText.destroy()
+                this.freeSpinContainer.destroy();
+            }   
+        }
         if(freeSpinNumber >= 1){
-            const freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
-            const freeSpinBg = this.scene.add.sprite(freeSpinContainer.x, freeSpinContainer.y, "normalButton").setScale(0.8, 0.5);
-            const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
-            this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
-            this.freeSpinBgImg = freeSpinBg
+            // this.freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
+            // const freeSpinBg = this.scene.add.sprite(this.freeSpinContainer.x, this.freeSpinContainer.y, "").setScale(0.8, 0.5);
+            // const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
+            // this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
+            // this.freeSpinBgImg = freeSpinBg
+        }else{
+           
         }
     }
     /**

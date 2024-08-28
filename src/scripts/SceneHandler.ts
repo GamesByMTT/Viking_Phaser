@@ -39,7 +39,7 @@ export class SceneHandler {
     removeScene(key: string) {
         console.log("removeSceneCalled", key);
         
-        if (this.scenes.has(key)) {
+        if (this.scenes.has(key)) {          
             this.game.scene.remove(key);
             this.scenes.delete(key);
         }

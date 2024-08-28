@@ -6,8 +6,9 @@ import { LineGenerator } from "./Lines";
 export default class LineSymbols extends Phaser.GameObjects.Container{
     numberArr: Phaser.GameObjects.Text[] = [];
     linesGenerator!: LineGenerator; // Reference to LineGenerator
+    numberContainers!: Phaser.GameObjects.Container
     constructor(scene: Phaser.Scene, yOf: number, xOf: number, linesGenerator: LineGenerator) {
-        console.log(xOf, yOf);
+        // console.log(xOf, yOf);
         super(scene);
         this.linesGenerator = linesGenerator;
         // Create lines based on initData
@@ -23,7 +24,8 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
     }
 
     createNumber(scene: Phaser.Scene, index: number): Phaser.GameObjects.Text {
-        let numberContainer = new Phaser.GameObjects.Container(scene);
+        const numberContainer = new Phaser.GameObjects.Container(scene);
+        
         let xPosition;
         
         let yPosition = 0;
@@ -33,12 +35,12 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
             // Even numbers (0, 2, 4, 6, 8, etc.) go on one side
             xPosition = - gameConfig.scale.width/3.75;
             yPosition = (index / 2) * 60 - 150;  // Staggered downwards for each even number
-            numberBg.setPosition(gameConfig.scale.width/4.3, yPosition + 380);
+            numberContainer.add(numberBg.setPosition(gameConfig.scale.width/4.3, yPosition + 380));
         } else {
             // Odd numbers (1, 3, 5, 7, 9, etc.) go on the opposite side
             xPosition = gameConfig.scale.width/3.79;
             yPosition =  ((index - 1) / 2) * 60 - 150;  // Staggered downwards for each odd number
-            numberBg.setPosition(gameConfig.scale.width / 1.31, yPosition + 380)
+            numberContainer.add(numberBg.setPosition(gameConfig.scale.width / 1.31, yPosition + 380))
         }
 
         // Create a text object for each number
@@ -47,16 +49,13 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
             color: "#ffffff",
             align: 'center',    
         }).setOrigin(0.5, 0.5).setDepth(12);
+        numberContainer.add(numberText)
         // Enable input on the number text
         numberText.setInteractive({ useHandCursor: true }).setDepth(5);
         
         // Add hover event listeners
         numberText.on("pointerover", () => this.showLines(index));
         numberText.on("pointerout", () => this.hideLines());
-
-
-        // numberText.on("pointerup", () => this.hideLines());
-
         return numberText;
     }
     showLines(index: number) {
