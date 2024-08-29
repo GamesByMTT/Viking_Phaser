@@ -175,8 +175,8 @@ export class Slots extends Phaser.GameObjects.Container {
                     if (this.slotSymbols[i][j].symbol.y >= this.slotMask.y + this.maskHeight) {
                         // Reposition the symbol to the top of the reel
                         const lastSymbolIndex = this.slotSymbols[i].length - 1;
-                        const newY = this.slotSymbols[i][0].symbol.y - this.symbolHeight * 6; // Adjust to space out symbols correctly
-                        this.slotSymbols[i][j].symbol.y = newY;
+                        const newY = this.slotSymbols[i][0].symbol.y - this.symbolHeight * 4; // Adjust to space out symbols correctly
+                        // this.slotSymbols[i][j].symbol.y = newY;
                     }
                 }
             }
@@ -279,7 +279,7 @@ class Symbols {
       update(dt: number) {
         
         if (this.startMoving) {
-          const deltaY = 6* dt; 
+          const deltaY = 2 * dt; 
           const newY = this.symbol.y + deltaY;  
           this.symbol.y = newY;         
         // Check if newY exceeds the maximum value

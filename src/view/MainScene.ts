@@ -106,7 +106,12 @@ export default class MainScene extends Scene {
      */
     recievedMessage(msgType: string, msgParams: any) {
         if (msgType === 'ResultData') {
-            this.time.delayedCall(1000, () => {             
+            this.time.delayedCall(1000, () => {    
+                if (ResultData.gameData.BonusStopIndex > -1) {
+                    setTimeout(() => {
+                        Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
+                    }, 2000);
+                }         
                 this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toString());
                 currentGameData.currentBalance = ResultData.playerData.Balance;
                 let betValue = (initData.gameData.Bets[currentGameData.currentBetIndex]) * 20
@@ -119,9 +124,6 @@ export default class MainScene extends Scene {
                 if (freeSpinCount >= 1) {
                     this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
                     this.uiContainer.freeSpininit(freeSpinCount)
-                    // Update the label text
-                    // this.uiContainer.freeSpinText.updateLabelText(freeSpinCount.toString());
-                    // Define the tween animation for Scaling
                     this.tweens.add({
                         targets: this.uiContainer.freeSpinText,
                         scaleX: 1.3, 
@@ -149,12 +151,7 @@ export default class MainScene extends Scene {
                    this.showWinPopup(winAmount, 'jackpotPopup')
                 }
                 this.slot.stopTween();
-                if (ResultData.gameData.BonusResult.length > 0) {
-                    // Bonus Scene Called if Result length > 0
-                    setTimeout(() => {
-                        Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
-                    }, 2000);
-                }
+                
             });
         }
     }
@@ -227,17 +224,8 @@ export default class MainScene extends Scene {
         // Create the sprite based on the key provided
         const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, spriteKey).setDepth(11);
         if(!this.uiContainer.isAutoSpinning){
-            const startButton = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + 80, 'freeSpinStartButton').setDepth(11).setScale(0.5, 0.5).setInteractive();
-            startButton.on("pointerdown", () => {
-                        inputOverlay.destroy();
-                        freeText.destroy();
-                        winSprite.destroy();
-                        startButton.destroy();
-                        Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
-                        currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
-                        // this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
-                        this.onSpinCallBack();
-            });
+          
+            
         }
         // Create the text object to display win amount
         const freeText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
@@ -254,6 +242,17 @@ export default class MainScene extends Scene {
                 freeText.setText(value.toString());
             },
             onComplete: () => {
+                const startButton = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY + 80, 'freeSpinStartButton').setDepth(11).setScale(0.5, 0.5).setInteractive();
+                startButton.on("pointerdown", () => {
+                    inputOverlay.destroy();
+                    freeText.destroy();
+                    winSprite.destroy();
+                    startButton.destroy();
+                    Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
+                    currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
+                    // this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
+                    this.onSpinCallBack();
+        });
                 if(this.uiContainer.isAutoSpinning){
                 this.time.delayedCall(3000, () => {
                     inputOverlay.destroy();

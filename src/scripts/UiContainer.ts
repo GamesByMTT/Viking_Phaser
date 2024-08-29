@@ -211,6 +211,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
                     this.maxbetBtn.disableInteractive()
                     currentGameData.currentBetIndex = initData.gameData.Bets[initData.gameData.Bets.length - 1];
                     this.CurrentBetText.updateLabelText((currentGameData.currentBetIndex*20).toString());
+                    this.CurrentLineText.updateLabelText(initData.gameData.Bets[initData.gameData.Bets.length - 1]);
                     this.scene.tweens.add({
                         targets: this.maxbetBtn,
                         scaleX: 1,
@@ -322,7 +323,6 @@ export class UiContainer extends Phaser.GameObjects.Container {
      * @description this method is used for showing the number of freeSpin value at the top of reels
      */
     freeSpininit(freeSpinNumber: number){
-        console.log("freeSpinNumber", freeSpinNumber, this.freeSpinBgImg);
         if(freeSpinNumber == 0){
             if(this.freeSpinBgImg){
                 this.freeSpinBgImg.destroy();

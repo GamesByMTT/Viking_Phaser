@@ -110,9 +110,6 @@ export default class MainLoader extends Scene {
 
     public loadScene() {
         this.completeLoading();
-        setTimeout(() => {
-            // Use SceneHandler to manage scenes   
             Globals.SceneHandler?.addScene('MainScene', MainScene, true)
-        }, 500);
     }
 }

@@ -69,7 +69,7 @@ export default class BonusScene extends Scene{
             );
             this.spinContainer.add(text);
         }
-        this.spinContainer.angle = 247.5;
+        this.spinContainer.angle = 0;
         this.startButton.on("pointerdown", ()=>{
             if (this.canSpinBonus) {
                  if(ResultData.gameData.BonusStopIndex){
@@ -83,51 +83,53 @@ export default class BonusScene extends Scene{
             }
         })
       }
-        spinWheel(targetIndex: number) {
-            const spinSound = Globals.soundResources["spinWheelMusic"];
-            spinSound.rate(1);  // Ensure starting rate is 1 (normal speed)
-            spinSound.play();
-        //    this.SoundManager.playSound("spinWheelMusic"),
-           this.canSpinBonus = false;
-           
-           let segments = values.length;
-           let anglePerSegment = 360 / segments;
-           let targetAngle = anglePerSegment/2 * targetIndex;
-           let angleone = ((45*(targetIndex))-22.5);
-           console.log("angleone", angleone, targetIndex);
-           
-           // Calculate random spins before landing on target
-           let randomSpins = Phaser.Math.Between(2, 5);
+      spinWheel(targetIndex: number) {
+        const spinSound = Globals.soundResources["spinWheelMusic"];
+        spinSound.rate(1);  // Ensure starting rate is 1 (normal speed)
+        spinSound.play();
         
-           // Spin the wheel
-           this.tweens.add({
-              targets: this.spinContainer,
-              angle: ((45*targetIndex)-22.5)+720,
-              ease: 'Back.easeOut',
-              duration: 5000,
-              onUpdate: (tween, target) => {
-                // Calculate the remaining time in the spin animation
-                const progress = tween.progress;
+        this.canSpinBonus = false;
+        
+        let segments = initData.gameData.BonusData.length;
+        let anglePerSegment = 360 / segments; // 45 degrees for 8 segments
+        let desiredStopAngle = 247.5;  // Your desired stopping angle
     
+        // Calculate the rotation needed to align targetIndex at the desired stop angle
+        let targetAngle = (desiredStopAngle - ((targetIndex * anglePerSegment) + (anglePerSegment / 2))) + 22.5;
+    
+        // Calculate random spins before landing on target
+        let randomSpins = Phaser.Math.Between(2, 5);
+        console.log(randomSpins, "randomSpins");
+        
+        let totalRotation = randomSpins * 360 + targetAngle;  // Total rotation including full spins
+        console.log(totalRotation, "totalRotation", targetAngle) ;
+        
+        // Spin the wheel
+        this.tweens.add({
+            targets: this.spinContainer,
+            angle: totalRotation,
+            ease: 'Back.easeOut',
+            duration: 5000,
+            onUpdate: (tween, target) => {
+                const progress = tween.progress;
                 // Gradually slow down the spin sound as the wheel slows down
-                if (progress > 0.5) {  // Start slowing sound when the spin is 70% complete
+                if (progress > 0.5) {
                     const newRate = 1 - ((progress - 0.7) * 2);  // Decrease rate to slow down
                     spinSound.rate(Phaser.Math.Clamp(newRate, 0.5, 1));  // Ensure rate doesn't go below 0.5
                 }
             },
-              // repeat: -1,
-              onComplete: () => {
-                // Stop or further reduce the rate of the sound
-                    spinSound.rate(0.5);  // Set final rate lower for effect or stop it
-                    spinSound.stop();  // Stop sound after delay
-                    
-                    this.startButton.setInteractive();
-                    this.startButton.setTexture("freeSpinStartButton")
-                    setTimeout(() => {
-                        Globals.SceneHandler?.removeScene("BonusScene")
-                    }, 2000);
+            onComplete: () => {
+                spinSound.rate(0.5);
+                spinSound.stop();
+    
+                this.startButton.setInteractive();
+                this.startButton.setTexture("freeSpinStartButton");
                 
-              }
-           });
-        }
+                setTimeout(() => {
+                    Globals.SceneHandler?.removeScene("BonusScene");
+                }, 2000);
+            }
+        });
+    }
+    
 }

@@ -5,6 +5,9 @@ import { TextLabel } from "./TextLabel";
 import { UiContainer } from "./UiContainer";
 import MainLoader from "../view/MainLoader";
 import SoundManager from "./SoundManager";
+import RexUIPlugin from 'phaser3-rex-plugins/templates/ui/ui-plugin.js';
+
+const Random = Phaser.Math.Between;
 
 export class UiPopups extends Phaser.GameObjects.Container {
     SoundManager: SoundManager;
@@ -23,6 +26,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
     offButton!:InteractiveBtn;
     toggleBar!: InteractiveBtn;
     soundEnabled: boolean = true; // Track sound state
+    musicEnabled: boolean = true; // Track sound state
     normalButtonSound!: Phaser.Sound.BaseSound
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, soundManager: SoundManager) {
         super(scene);
@@ -169,7 +173,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
 
         const toggleMusicBar = this.scene.add.image(200, 50, "toggleBar")
         toggleMusicBar.setScale(0.5)
-        const musicinitialTexture = this.soundEnabled ? "onButton" : "offButton";
+        const musicinitialTexture = this.musicEnabled ? "onButton" : "offButton";
         const offMusic = this.scene.add.image(220, 50, musicinitialTexture)
         offMusic.setScale(0.5)
         offMusic.setInteractive();
@@ -220,16 +224,16 @@ export class UiPopups extends Phaser.GameObjects.Container {
 
     toggleMusic(offMusic: any) {
         // Toggle sound state
-        this.soundEnabled = !this.soundEnabled;
-        if (this.soundEnabled) {
+        this.musicEnabled = !this.musicEnabled;
+        if (this.musicEnabled) {
             offMusic.setTexture('onButton');
             offMusic.setPosition(220, 50); // Move position for 'On' state
-            this.SoundManager.setMusicEnabled(this.soundEnabled)
+            this.SoundManager.setMusicEnabled(this.musicEnabled)
 
             // Globals.soundManager.play("yourSound");
         } else {
             offMusic.setTexture('offButton');
-            this.SoundManager.setMusicEnabled(this.soundEnabled);
+            this.SoundManager.setMusicEnabled(this.musicEnabled);
             offMusic.setPosition(180, 50); // Move position for 'Off' state
             // Logic to turn sound off
             // Globals.soundManager.stop("yourSound");
@@ -277,26 +281,8 @@ export class UiPopups extends Phaser.GameObjects.Container {
         const scrollBarBg = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 1.9, "scrollBg")
         scrollBarBg.setScale(0.7)
         popupContainer.add([closeButton, scrollBarBg]);
-
         const scrollContainer = this.scene.add.container(0, 0);
         
-        const scrollbarX = 1920;
-        const scrollbarY = 50;
-        const scrollbarHeight = 600;
-        const handleHeight = 100;
-        const handleWidth = 20;
-       
-        const scrollbarHandle = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2, "scroller");
-        scrollbarHandle.setOrigin(0.5)
-        const firstImage = this.scene.add.sprite(gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 240, "minorSymbolsHeading");
-        const minorSymnol1 = this.scene.add.sprite(gameConfig.scale.width/2 - 500, gameConfig.scale.width /2 - 200, "slots0_0");
-        minorSymnol1.setScale(0.5)
-
-        scrollbarHandle.setInteractive(new Phaser.Geom.Rectangle(scrollbarX, scrollbarY, handleWidth, handleHeight), Phaser.Geom.Rectangle.Contains);
-
-        scrollContainer.add([scrollbarHandle, firstImage, minorSymnol1]);
-
-
         const maskShape = this.scene.add.graphics();
         // maskShape.fillStyle(0xffffff);
         maskShape.fillRect(
@@ -317,8 +303,19 @@ export class UiPopups extends Phaser.GameObjects.Container {
                 scrollContainer.y += pointer.velocity.y / 10; // Adjust the divisor for smoother scrolling
             }
         });
-    
-       
+
+        const scrollbarX = 1920;
+        const scrollbarY = 50;
+        const scrollbarHeight = 600;
+        const handleHeight = 100;
+        const handleWidth = 20;
+        const scrollbarHandle = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2, "scroller");
+        scrollbarHandle.setOrigin(0.5)
+        const firstImage = this.scene.add.sprite(gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 240, "minorSymbolsHeading");
+        const minorSymnol1 = this.scene.add.sprite(gameConfig.scale.width/2 - 500, gameConfig.scale.width /2 - 200, "slots0_0");
+        minorSymnol1.setScale(0.5)
+        scrollbarHandle.setInteractive(new Phaser.Geom.Rectangle(scrollbarX, scrollbarY, handleWidth, handleHeight), Phaser.Geom.Rectangle.Contains);
+        scrollContainer.add([scrollbarHandle, firstImage, minorSymnol1]);
     }
 
     buttonMusic(key: string){
