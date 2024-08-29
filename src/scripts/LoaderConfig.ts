@@ -54,6 +54,14 @@ export const LoaderConfig = {
     settingPopup:"src/sprites/settingPopup.png",
     soundImage:"src/sprites/Sounds.png",
     musicImage: "src/sprites/Music.png",
+    toggleBar: "src/sprites/ToggleBar.png",
+    onButton: "src/sprites/On.png",
+    offButton: "src/sprites/Off.png",
+    headingImage: "src/sprites/PayTable_.png",
+    popupbg: "src/sprites/PopupBg.jpg",
+    scrollBg: "src/sprites/ScrollBar.png",
+    scroller:"src/sprites/Roller.png",
+    minorSymbolsHeading: "src/sprites/MoniorSymbols.png",
     
     slots0_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots0_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",
@@ -530,7 +538,12 @@ export const fontData = ["Montserrat"];
 
 
 export const LoaderSoundConfig: any = {
-onSpin :  "/src/sounds/onStartCoin.mp3",
+        backgroundMusic: "src/sounds/Teaser.wav",
+        onSpin :  "/src/sounds/slot-machine-loop.mp3",
+        spinButton: "src/sounds/spin.wav",
+        winMusic: "src/sounds/JackpotWinner.mp3",
+        buttonpressed: "src/sounds/Game-Button.wav"
+ 
 };
 
 export const preloaderConfig = {

@@ -4,9 +4,10 @@ import { Globals, ResultData, currentGameData, initData } from './Globals';
 import { TextLabel } from './TextLabel';
 import { gameConfig } from './appconfig';
 import MainScene from '../view/MainScene';
-
+import SoundManager from './SoundManager';
 // Define UiContainer as a Phaser Scene class
 export class UiContainer extends Phaser.GameObjects.Container {
+    SoundManager: SoundManager
     spinBtn!: Phaser.GameObjects.Sprite;
     maxbetBtn!: Phaser.GameObjects.Sprite;
     autoBetBtn!: Phaser.GameObjects.Sprite;
@@ -25,8 +26,10 @@ export class UiContainer extends Phaser.GameObjects.Container {
     fireSprite2!: Phaser.GameObjects.Sprite
     betButtonDisable!: Phaser.GameObjects.Container
     freeSpinContainer!: Phaser.GameObjects.Container
+    spinButtonSound!: Phaser.Sound.BaseSound
+    normalButtonSound!: Phaser.Sound.BaseSound
 
-    constructor(scene: Scene, spinCallBack: () => void) {
+    constructor(scene: Scene, spinCallBack: () => void, soundManager: SoundManager) {
         super(scene);
         scene.add.existing(this); 
         // Initialize UI elements
@@ -37,6 +40,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
         this.winBtnInit();
         this.balanceBtnInit();
         this.BetBtnInit();
+        this.SoundManager = soundManager;
         // this.freeSpininit();
         // this.vaseInit();
     }
@@ -52,6 +56,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
         linePanel.setPosition(gameConfig.scale.width/5.1, this.maxbetBtn.y);
         // container.add(lineText);
         this.pBtn = this.createButton('pBtn', 90, 3, () => {
+            this.bnuttonMusic("buttonpressed");
             this.pBtn.setTexture('pBtnH');
             this.pBtn.disableInteractive();
             if (!currentGameData.isMoving) {
@@ -71,6 +76,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
         }).setDepth(0);
         container.add(this.pBtn);
         this.mBtn = this.createButton('mBtn', -95, 3, () => {
+            this.bnuttonMusic("buttonpressed");
             this.mBtn.setTexture('mBtnH');
             this.mBtn.disableInteractive();
             if (!currentGameData.isMoving) {
@@ -105,9 +111,22 @@ export class UiContainer extends Phaser.GameObjects.Container {
         // winPanel.setScale(0.8, 0.8)
         winPanel.setPosition(gameConfig.scale.width/1.50, this.maxbetBtn.y);
         const currentWining: any = ResultData.playerData.currentWining;
+       
         this.currentWiningText = new TextLabel(this.scene, 0, 7, currentWining, 27, "#FFFFFF");
         const winPanelChild = this.scene.add.container(winPanel.x, winPanel.y)
         winPanelChild.add(this.currentWiningText);
+        if(currentWining > 0){
+            console.log(currentWining, "currentWining");
+            this.scene.tweens.add({
+                targets:  this.currentWiningText,
+                scaleX: 1.3, 
+                scaleY: 1.3, 
+                duration: 800, // Duration of the scale effect
+                yoyo: true, 
+                repeat: -1, 
+                ease: 'Sine.easeInOut' // Easing function
+            });
+        }
     }
     /**
      * @method balanceBtnInit Remaning balance after bet (total)
@@ -127,46 +146,50 @@ export class UiContainer extends Phaser.GameObjects.Container {
      * @method spinBtnInit Spin the reel
      * @description this method is used for creating and spin button and on button click the a SPIn emit will be triggered to socket and will deduct the amout according to the bet
      */
-spinBtnInit(spinCallBack: () => void) {
-    this.spinBtn = new Phaser.GameObjects.Sprite(this.scene, 0, 0, "spinBtn");
-    this.spinBtn = this.createButton('spinBtn', gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1, () => {
-        // checking if autoSpining is working or not if it is auto Spining then stop it
-        if(this.isAutoSpinning){
-            this.autoBetBtn.emit('pointerdown'); // Simulate the pointerdown event
-            this.autoBetBtn.emit('pointerup'); // Simulate the pointerup event (if needed)
-            return;
-        }
-       // tween added to scale transition
-        this.scene.tweens.add({
-            targets: this.spinBtn,
-            scaleX: 1.1,
-            scaleY: 1.1,
-            duration: 100,
-            onComplete: () => {
-                // Send message and update the balance
-                Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
-                currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
-                this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
-                // Trigger the spin callback
-                this.onSpin(true);
-                spinCallBack();
-
-                // Scale back to original size 
-                this.scene.tweens.add({
-                    targets: this.spinBtn,
-                    scaleX: 1,
-                    scaleY: 1,
-                    duration: 100,
-                    onComplete: () => {
-                        
-                    }
-                });
-                // 
+    spinBtnInit(spinCallBack: () => void) {
+        
+        this.spinBtn = new Phaser.GameObjects.Sprite(this.scene, 0, 0, "spinBtn");
+        this.spinBtn = this.createButton('spinBtn', gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1, () => {
+            // this.spinButtonSound = this.scene.sound.add("spinButton", {loop: false, volume: 0.8})
+            // this.spinButtonSound.play();
+                this.bnuttonMusic("spinButton");
+            // checking if autoSpining is working or not if it is auto Spining then stop it
+            if(this.isAutoSpinning){
+                this.autoBetBtn.emit('pointerdown'); // Simulate the pointerdown event
+                this.autoBetBtn.emit('pointerup'); // Simulate the pointerup event (if needed)
+                return;
             }
-        });
-    }).setDepth(1);
+        // tween added to scale transition
+            this.scene.tweens.add({
+                targets: this.spinBtn,
+                scaleX: 1.1,
+                scaleY: 1.1,
+                duration: 100,
+                onComplete: () => {
+                    // Send message and update the balance
+                    Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
+                    currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
+                    this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
+                    // Trigger the spin callback
+                    this.onSpin(true);
+                    spinCallBack();
 
-}
+                    // Scale back to original size 
+                    this.scene.tweens.add({
+                        targets: this.spinBtn,
+                        scaleX: 1,
+                        scaleY: 1,
+                        duration: 100,
+                        onComplete: () => {
+                            
+                        }
+                    });
+                    // 
+                }
+            });
+        }).setDepth(1);
+
+    }
 
     /**
      * @method maxBetBtn used to increase the bet amount to maximum
@@ -175,7 +198,9 @@ spinBtnInit(spinCallBack: () => void) {
     maxBetInit() {
         this.maxbetBtn =  new Phaser.GameObjects.Sprite(this.scene, 0, 0, 'maxBetBtn');
         this.maxbetBtn = this.createButton('maxBetBtn', gameConfig.scale.width / 2 - this.maxbetBtn.width / 1.3, gameConfig.scale.height - this.maxbetBtn.height - 25 , () => {
-           
+            if (this.SoundManager) {
+                this.bnuttonMusic("buttonpressed");
+            }
             this.scene.tweens.add({
                 targets: this.maxbetBtn,
                 scaleX: 1.1,
@@ -216,6 +241,11 @@ spinBtnInit(spinCallBack: () => void) {
             gameConfig.scale.width / 2 + this.autoBetBtn.width / 1.3,
             gameConfig.scale.height - this.autoBetBtn.height - 25,
             () => {
+                this.normalButtonSound = this.scene.sound.add("buttonpressed", {
+                    loop: false,
+                    volume: 0.8
+                })
+                this.normalButtonSound.play()
                 this.scene.tweens.add({
                     targets: this.autoBetBtn,
                     scaleX: 1.2,
@@ -395,5 +425,13 @@ spinBtnInit(spinCallBack: () => void) {
             this.pBtn.setInteractive({ useHandCursor: true, pixelPerfect: true });
             this.mBtn.setInteractive({ useHandCursor: true, pixelPerfect: true });
         }        
+    }
+
+    bnuttonMusic(key: string){
+        this.SoundManager.playSound(key)
+    }
+    update(dt: number){
+        console.log("check container");
+        
     }
 }

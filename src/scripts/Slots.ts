@@ -3,12 +3,14 @@ import { Globals, ResultData, initData } from "./Globals";
 import { gameConfig } from './appconfig';
 import { UiContainer } from './UiContainer';
 import { Easing, Tween } from "@tweenjs/tween.js"; // If using TWEEN for animations
-
+import SoundManager from './SoundManager';
 export class Slots extends Phaser.GameObjects.Container {
     slotMask: Phaser.GameObjects.Graphics;
+    SoundManager: SoundManager
     slotSymbols: any[][] = [];
     moveSlots: boolean = false;
     uiContainer!: UiContainer;
+    // winingMusic!: Phaser.Sound.BaseSound
     resultCallBack: () => void;
     slotFrame!: Phaser.GameObjects.Sprite;
     private maskWidth: number;
@@ -19,14 +21,12 @@ export class Slots extends Phaser.GameObjects.Container {
     private spacingX: number;
     private spacingY: number;
     private reelContainers: Phaser.GameObjects.Container[] = [];
-    
-
-    constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void) {
+    constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void, SoundManager : SoundManager) {
         super(scene);
 
         this.resultCallBack = callback;
         this.uiContainer = uiContainer;
-
+        this.SoundManager = SoundManager
         this.slotMask = new Phaser.GameObjects.Graphics(scene);
         
         this.maskWidth = gameConfig.scale.width / 1.8;
@@ -112,9 +112,7 @@ export class Slots extends Phaser.GameObjects.Container {
     }
 
     stopTween() {
-        // Calculate the maximum delay for endTween
-        console.log(this.slotSymbols.length , "this.slotSymbols.length ");
-        
+        // Calculate the maximum delay for endTween  
         const maxDelay = 200 * (this.slotSymbols.length - 1);
         // Use a single timeout for resultCallBack, ensuring it's called only once after all endTweens
         setTimeout(() => {
@@ -127,7 +125,10 @@ export class Slots extends Phaser.GameObjects.Container {
                         const [y, x]: number[] = row.split(",").map((value) => parseInt(value)); // Swap x and y here
                         const animationId = `symbol_anim_${ResultData.gameData.ResultReel[x][y]}`;
                         if (this.slotSymbols[y] && this.slotSymbols[y][x]) { // Correct access based on swapped x and y
-                            // Debuging the Symbol       
+                            // Debuging the Symbol
+                            // this.winingMusic = this.scene.sound.add("winMusic", {loop: false, volume: 0.8})
+                            // this.winingMusic.play();
+                            this.winMusic("winMusic")
                             this.slotSymbols[y][x].playAnimation(animationId);   
                              
                         } 
@@ -180,6 +181,10 @@ export class Slots extends Phaser.GameObjects.Container {
                 }
             }
         }
+    }
+    // winMusic
+    winMusic(key: string){
+        this.SoundManager.playSound(key)
     }
     
 }

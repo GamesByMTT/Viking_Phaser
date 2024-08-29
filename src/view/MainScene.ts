@@ -7,6 +7,7 @@ import LineSymbols from '../scripts/LineSymbols';
 import { Globals, ResultData, currentGameData, initData } from '../scripts/Globals';
 import { gameConfig } from '../scripts/appconfig';
 import BonusScene from './BonusScene';
+import SoundManager from '../scripts/SoundManager';
 
 export default class MainScene extends Scene {
     slot!: Slots;
@@ -18,9 +19,11 @@ export default class MainScene extends Scene {
     roofTop!: Phaser.GameObjects.Sprite
     snow!: Phaser.GameObjects.Sprite  
     lineGenerator!: LineGenerator;
+    soundManager!: SoundManager
     uiContainer!: UiContainer;
     uiPopups!: UiPopups;
     lineSymbols!: LineSymbols
+    onSpinSound!: Phaser.Sound.BaseSound
     private mainContainer!: Phaser.GameObjects.Container;
 
     constructor() {
@@ -34,6 +37,7 @@ export default class MainScene extends Scene {
         const { width, height } = this.cameras.main;
         // Initialize main container
         this.mainContainer = this.add.container();
+        this.soundManager = new SoundManager(this)
 
         // Set up the stairs frame
         this.stairs = new Phaser.GameObjects.Sprite(this, width/2, height/1.08, 'stairs').setDepth(0)
@@ -44,21 +48,24 @@ export default class MainScene extends Scene {
         this.snow = new Phaser.GameObjects.Sprite(this, width/2, height/2.4, 'snow')
         
         this.mainContainer.add([this.reelBg, this.roofTop, this.snow, this.stairs, this.columnleft, this.columnRight])
+        this.soundManager.playSound("backgroundMusic")
 
         // Initialize UI Container
-        this.uiContainer = new UiContainer(this, () => this.onSpinCallBack());
+        this.uiContainer = new UiContainer(this, () => this.onSpinCallBack(), this.soundManager);
         this.mainContainer.add(this.uiContainer);
         
         // // Initialize Slots
-        this.slot = new Slots(this, this.uiContainer,() => this.onResultCallBack());
+        this.slot = new Slots(this, this.uiContainer,() => this.onResultCallBack(), this.soundManager);
         this.mainContainer.add(this.slot);
 
         // Initialize payLines
         this.lineGenerator = new LineGenerator(this, this.slot.slotSymbols[0][0].symbol.height, this.slot.slotSymbols[0][0].symbol.width).setScale(0.5, 0.4);
         this.mainContainer.add(this.lineGenerator);
 
+        
+
         // Initialize UI Popups
-        this.uiPopups = new UiPopups(this, this.uiContainer);
+        this.uiPopups = new UiPopups(this, this.uiContainer, this.soundManager);
         this.mainContainer.add(this.uiPopups)
 
         // Initialize LineSymbols
@@ -75,15 +82,18 @@ export default class MainScene extends Scene {
      * @description update the spirte of Spin Button after reel spin and emit Lines number to show the line after wiining
      */
     onResultCallBack() {
+        const onSpinMusic = "onSpin"
         this.uiContainer.onSpin(false);
+        this.soundManager.stopSound(onSpinMusic)
         this.lineGenerator.showLines(ResultData.gameData.linesToEmit);
     }
-
     /**
      * @method onSpinCallBack Move reel
      * @description on spin button click moves the reel on Seen and hide the lines if there are any
      */
     onSpinCallBack() {
+        const onSpinMusic = "onSpin"
+        this.soundManager.playSound(onSpinMusic)
         this.slot.moveReel();
         this.lineGenerator.hideLines();
     }
