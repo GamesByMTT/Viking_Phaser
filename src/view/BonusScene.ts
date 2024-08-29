@@ -1,10 +1,12 @@
 import Phaser, { Scene } from "phaser";
 import { Globals, initData, ResultData } from "../scripts/Globals";
 import { gameConfig } from "../scripts/appconfig";
+import SoundManager from "../scripts/SoundManager";
 let values = initData.gameData.BonusData
 export default class BonusScene extends Scene{
     public bonusContainer!: Phaser.GameObjects.Container
    public spinContainer!: Phaser.GameObjects.Container;
+   SoundManager!: SoundManager
    SceneBg!: Phaser.GameObjects.Sprite
     columnLeft!: Phaser.GameObjects.Sprite
     columnRight!: Phaser.GameObjects.Sprite
@@ -19,6 +21,7 @@ export default class BonusScene extends Scene{
     public canSpinBonus: boolean = true;
     constructor() {
         super({ key: 'BonusScene' });
+       
         
     }
     create(){
@@ -81,6 +84,10 @@ export default class BonusScene extends Scene{
         })
       }
         spinWheel(targetIndex: number) {
+            const spinSound = Globals.soundResources["spinWheelMusic"];
+            spinSound.rate(1);  // Ensure starting rate is 1 (normal speed)
+            spinSound.play();
+        //    this.SoundManager.playSound("spinWheelMusic"),
            this.canSpinBonus = false;
            
            let segments = values.length;
@@ -98,13 +105,27 @@ export default class BonusScene extends Scene{
               angle: ((45*targetIndex)-22.5)+720,
               ease: 'Back.easeOut',
               duration: 5000,
+              onUpdate: (tween, target) => {
+                // Calculate the remaining time in the spin animation
+                const progress = tween.progress;
+    
+                // Gradually slow down the spin sound as the wheel slows down
+                if (progress > 0.5) {  // Start slowing sound when the spin is 70% complete
+                    const newRate = 1 - ((progress - 0.7) * 2);  // Decrease rate to slow down
+                    spinSound.rate(Phaser.Math.Clamp(newRate, 0.5, 1));  // Ensure rate doesn't go below 0.5
+                }
+            },
               // repeat: -1,
               onComplete: () => {
-                this.startButton.setInteractive();
-                this.startButton.setTexture("freeSpinStartButton")
-                setTimeout(() => {
-                    Globals.SceneHandler?.removeScene("BonusScene")
-                }, 4000);
+                // Stop or further reduce the rate of the sound
+                    spinSound.rate(0.5);  // Set final rate lower for effect or stop it
+                    spinSound.stop();  // Stop sound after delay
+                    
+                    this.startButton.setInteractive();
+                    this.startButton.setTexture("freeSpinStartButton")
+                    setTimeout(() => {
+                        Globals.SceneHandler?.removeScene("BonusScene")
+                    }, 2000);
                 
               }
            });

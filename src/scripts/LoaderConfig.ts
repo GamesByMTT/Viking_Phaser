@@ -542,7 +542,8 @@ export const LoaderSoundConfig: any = {
         onSpin :  "/src/sounds/slot-machine-loop.mp3",
         spinButton: "src/sounds/spin.wav",
         winMusic: "src/sounds/JackpotWinner.mp3",
-        buttonpressed: "src/sounds/Game-Button.wav"
+        buttonpressed: "src/sounds/Game-Button.wav",
+        spinWheelMusic: "src/sounds/spinWheel.mp3"
  
 };
 
