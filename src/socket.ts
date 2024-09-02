@@ -1,6 +1,7 @@
 import { io } from "socket.io-client";
 import { Globals, ResultData, initData } from "./scripts/Globals";
 import MainLoader from "./view/MainLoader";
+let counter = 0
 
 
 // const socketUrl = process.env.SOCKET_URL || ""
@@ -52,14 +53,23 @@ export class SocketManager {
       this.socket.on("message", (message : any) => {
         const data = JSON.parse(message);
         // console.log(`Message ID : ${data.id} |||||| Message Data : ${JSON.stringify(data.message)}`);
-        if(data.id == "InitData") {
-            // Globals.MainLoader?.onInitDataReceived();
-            // this.onInitDataReceived()
+        if(data.id == "InitData" ) {
+          console.log(counter, "Socket");
+          if(initData.gameData.Bets.length != 0){
+
+            
+          }
+          else{
             initData.gameData = data.message.GameData;
             initData.playerData = data.message.PlayerData;
+            initData.UIData.symbols = data.message.UIData.paylines.symbols
             initData.gameData.BonusData = data.message.BonusData;
             console.log(data, "initData on Socket File");
             Globals.SceneHandler?.addScene("MainLoader", MainLoader, true)
+          }
+            // Globals.MainLoader?.onInitDataReceived();
+            // this.onInitDataReceived()
+            
         }
         if(data.id == "ResultData"){
               ResultData.gameData = data.message.GameData;

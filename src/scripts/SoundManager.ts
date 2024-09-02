@@ -11,6 +11,7 @@ export default class SoundManager {
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
+        this.setupFocusBlurEvents();
     }
 
     public addSound(key: string, url: string) {
@@ -38,9 +39,11 @@ export default class SoundManager {
     }
 
     public pauseSound(key: string) {
-        if (this.sounds[key]) {
-            this.sounds[key].pause();
-        }
+        Globals.soundResources[key].pause();
+    }
+
+    public resumeBgMusic(key: string){
+        Globals.soundResources[key].play()
     }
 
     public stopSound(key: string) {
@@ -69,5 +72,15 @@ export default class SoundManager {
 
     public getSound(key: string): Phaser.Sound.BaseSound | undefined {
         return this.sounds[key];
+    }
+    private setupFocusBlurEvents() {
+        window.addEventListener('blur', () => {
+            console.log("onBlur");
+                this.pauseSound('backgroundMusic');
+        });
+
+        window.addEventListener('focus', () => {
+            this.resumeBgMusic('backgroundMusic');
+        });
     }
 }

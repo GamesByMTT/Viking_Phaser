@@ -19,9 +19,7 @@ export class LineGenerator extends Phaser.GameObjects.Container {
             let line = new Lines(scene, i);
             this.add(line);
             this.lineArr.push(line);
-          
         }
-
         this.setPosition(gameConfig.scale.width / 3.2, gameConfig.scale.height/2.9);
         // Add this Container to the scene
         scene.add.existing(this);
@@ -29,8 +27,11 @@ export class LineGenerator extends Phaser.GameObjects.Container {
 
 
     showLines(lines: number[]) {
+        console.log(lines, "lines");
+        
         lines.forEach(lineIndex => {
             if (lineIndex >= 0 && lineIndex < this.lineArr.length) {
+                console.log(this.lineArr[lineIndex], "this.lineArr[lineIndex]");
                 this.lineArr[lineIndex].showLine();
             }
         });
@@ -91,6 +92,7 @@ export class Lines extends Phaser.GameObjects.Container {
     }
 
     showLine() {
+
         this.lineSprites.forEach(sprite => sprite.setVisible(true));
     }
 

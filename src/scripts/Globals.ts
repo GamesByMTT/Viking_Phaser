@@ -14,7 +14,6 @@ type globalDataType = {
   SceneHandler: SceneHandler | undefined
   Socket : SocketManager | undefined,
   PhaserInstance: Phaser.Game | undefined;
-
 }
 
 export const Globals: globalDataType = {
@@ -28,7 +27,6 @@ export const Globals: globalDataType = {
     return device.os.android || device.os.iOS;
   },
   SceneHandler: undefined,
-  
   fpsStats: new Stats(),
   Socket: undefined,
   soundResources: {},
@@ -61,6 +59,10 @@ export const initData = {
     currentWining : 0,
     currentBet : 0,
   },
+  UIData:{
+    symbols: [[]],
+    spclSymbolTxt: []
+  }
 };
 
 export const ResultData = {
@@ -90,10 +92,11 @@ export const TextStyle = {
   dropShadowAngle: 1.8,
   dropShadowColor: "#ffffff",
   dropShadowDistance: 1,
-  fill: "#4f3130",
+  fill: "#ffffff",
   fillGradientStops: [
     0.4
   ],
+  fontSize: 32,
   fontWeight: "bolder",
   lineJoin: "round",
   miterLimit: 0,

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Globals, TextStyle } from "./Globals";
+import { Globals, initData, TextStyle } from "./Globals";
 import { gameConfig } from "./appconfig";
 import { TextLabel } from "./TextLabel";
 import { UiContainer } from "./UiContainer";
@@ -244,79 +244,102 @@ export class UiPopups extends Phaser.GameObjects.Container {
      * @method openinfo
      */
 
-    openInfoPopup() {
-        // 1. Create the main popup container
-        const popupContainer = this.scene.add.container(0, 0).setDepth(11);
-    
-        // 2. Add a background to the popup container
-        const popupBackground = this.scene.add.sprite(
-            gameConfig.scale.width / 2, 
-            gameConfig.scale.height / 2, 
-            "popupbg"           
-        );
-        popupBackground.setDisplaySize(1920, 1080)
-        popupContainer.add(popupBackground);
-    
-        // 3. Add a heading image to the popup container
-        const headingImage = this.scene.add.image(
-            gameConfig.scale.width / 2, 
-            gameConfig.scale.height / 2 - 400, 
-            'headingImage'
-        );
-      
-        popupContainer.add(headingImage);
+        openInfoPopup() { 
+                // 1. Create the main popup container 
+                const popupContainer = this.scene.add.container(0, 0).setDepth(11); 
+                // 2. Add a background to the popup container 
+                const popupBackground = this.scene.add.sprite( gameConfig.scale.width / 2, gameConfig.scale.height / 2, "popupbg" ); popupBackground.setDisplaySize(1920, 1080); popupContainer.add(popupBackground); 
+                // 3. Add a heading image to the popup container 
+                const headingImage = this.scene.add.image( gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 400, 'headingImage' ); popupContainer.add(headingImage); 
+                // 4. Add a close button to the popup 
+                const closeButton = this.scene.add.sprite( gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2 - 400, 'exitButton' ).setInteractive(); 
+                closeButton.setScale(0.5); closeButton.on('pointerdown', () => { popupContainer.destroy(); 
+                    // Destroy the popup when the close button is clicked 
+                    scrollContainer.destroy(); 
+                    // Destroy the scroll container when the popup is closed
+                    }); 
+                    popupContainer.add(closeButton); 
+                    // 5. Create a mask to define the visible area for scrolling 
+                    const maskShape = this.scene.make.graphics().fillRect( 
+                        0, // Adjust X position to center 
+                        gameConfig.scale.height/2 - 300, // Adjust Y position 
+                        gameConfig.scale.width - 100, // Full width minus some padding 
+                        800 // Desired height of the scrollable area 
+                    ); 
+                    const mask = maskShape.createGeometryMask(); 
+                    // 6. Add the scrollable container to the popup container 
+                    const scrollContainer = this.scene.add.container(
+                        0, // Adjust X position to align with the mask
+                        gameConfig.scale.height / 2 - 300 // Adjust Y position
+                    );
+                    scrollContainer.setMask(mask); // Apply the mask to the scroll container 
+                    popupContainer.add(scrollContainer); 
+                    console.log("initData", initData.UIData.symbols);
+                    
+                    // 7. Add the content that will be scrolled 
+                    const contentHeight = 2000; // Example content height, adjust as needed 
+                    const content = this.scene.add.image( gameConfig.scale.width / 2, 100, 'minorSymbolsHeading' ).setOrigin(0.5).setDepth(2); 
+                    const minSymbol1 = this.scene.add.image(350, 350, "slots0_0").setDepth(2).setScale(0.5) 
+                    const minSymbol2 = this.scene.add.image(850, 350, "slots1_0").setDepth(2).setScale(0.5) 
+                    const minSymbol3 = this.scene.add.image(1350, 350, "slots2_0").setDepth(2).setScale(0.5) 
+                    const minSymbol1Text = this.scene.add.text(450, 300, `5X - ${initData.UIData.symbols[0]} \n4X - 15 \n3X - 5`, TextStyle ) 
+                    const minSymbol2Text = this.scene.add.text(950, 300, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
+                    const minSymbol3Text = this.scene.add.text(1450, 300, '5X - 100 \n4X - 50 \n3X - 10', TextStyle ) 
+                    const minSymbol4 = this.scene.add.image(650, 550, "slots3_0").setDepth(2).setScale(0.5) 
+                    const minSymbol5 = this.scene.add.image(1050, 550, "slots4_0").setDepth(2).setScale(0.5) 
+                    const minSymbol4Text = this.scene.add.text(750, 500, '5X - 125 \n4X - 75 \n3X - 12', TextStyle ) 
+                    const minSymbol5Text = this.scene.add.text(1150, 500, '5X - 250 \n4X - 100 \n3X - 15', TextStyle ) 
+                     
+                    const majorSymbol1 = this.scene.add.image(650, 1100, "slots5_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol1Text = this.scene.add.text(750, 1050, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
+                    const majorSymbol2 = this.scene.add.image(1050, 1100, "slots8_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol2Text = this.scene.add.text(1150, 1050, '5X - 100 \n4X - 50 \n3X - 10', TextStyle ) 
+                    const majorSymbol3 = this.scene.add.image(650, 1300, "slots7_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol3Text = this.scene.add.text(750, 1250, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
+                    const majorSymbol4 = this.scene.add.image(1050, 1300, "slots6_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol4Text = this.scene.add.text(1150, 1250, '5X - 70 \n4X - 25 \n3X - 8', TextStyle )
+                   
+                    const specialSymBol1 = this.scene.add.image(200, 1750, "slots10_0").setDepth(2).setOrigin(0.5)
+                    const specialSymBol1Text = this.scene.add.text(100, 1700, "", TextStyle)
+                    const specialSymBol2 = this.scene.add.image(200, 1950, "slots12_0").setDepth(2).setOrigin(0.5)
 
-         // 8. Add a close button to the popup
-         const closeButton = this.scene.add.sprite(
-            gameConfig.scale.width / 2 + 800, 
-            gameConfig.scale.height / 2 - 400, 
-            'exitButton', 
-        ).setInteractive();
-        closeButton.setScale(0.5)
-    
-        closeButton.on('pointerdown', () => {
-            popupContainer.destroy(); // Destroy the popup when the close button is clicked
-            scrollContainer.destroy()
-        });
-        const scrollBarBg = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 1.9, "scrollBg")
-        scrollBarBg.setScale(0.7)
-        popupContainer.add([closeButton, scrollBarBg]);
-        const scrollContainer = this.scene.add.container(0, 0);
-        
-        const maskShape = this.scene.add.graphics();
-        // maskShape.fillStyle(0xffffff);
-        maskShape.fillRect(
-            0, 
-            gameConfig.scale.height / 2 - 300, 
-            gameConfig.scale.width, gameConfig.scale.height
-        );
-    
-        const mask = maskShape.createGeometryMask();
-        scrollContainer.setMask(mask);
-    
-        // 6. Add the scrollable container to the popup container
-        popupContainer.add(scrollContainer);
-        
-        // 7. Make the scrollContainer scrollable
-        this.scene.input.on('pointermove', function (pointer: any) {
-            if (pointer.isDown) {
-                scrollContainer.y += pointer.velocity.y / 10; // Adjust the divisor for smoother scrolling
-            }
-        });
-
-        const scrollbarX = 1920;
-        const scrollbarY = 50;
-        const scrollbarHeight = 600;
-        const handleHeight = 100;
-        const handleWidth = 20;
-        const scrollbarHandle = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2, "scroller");
-        scrollbarHandle.setOrigin(0.5)
-        const firstImage = this.scene.add.sprite(gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 240, "minorSymbolsHeading");
-        const minorSymnol1 = this.scene.add.sprite(gameConfig.scale.width/2 - 500, gameConfig.scale.width /2 - 200, "slots0_0");
-        minorSymnol1.setScale(0.5)
-        scrollbarHandle.setInteractive(new Phaser.Geom.Rectangle(scrollbarX, scrollbarY, handleWidth, handleHeight), Phaser.Geom.Rectangle.Contains);
-        scrollContainer.add([scrollbarHandle, firstImage, minorSymnol1]);
-    }
+                    const specialSymBol2Text = this.scene.add.text(100, 1900, "", TextStyle)
+                    const MajorSymBolHeading = this.scene.add.image( gameConfig.scale.width / 2, 800, 'majorSymbolHeading' ).setOrigin(0.5).setDepth(2);
+                    const specialSymBolHeading = this.scene.add.image(gameConfig.scale.width / 2, 1550, "specialSymBolHeading").setDepth(2).setOrigin(0.5)
+                    scrollContainer.add([content,minSymbol1, minSymbol1Text, minSymbol2,minSymbol2Text, 
+                        minSymbol3, minSymbol3Text, minSymbol4, minSymbol4Text, minSymbol5, minSymbol5Text, 
+                        MajorSymBolHeading, majorSymbol1, majorSymbol1Text, majorSymbol2, majorSymbol2Text, 
+                        majorSymbol3, majorSymbol3Text, majorSymbol4, majorSymbol4Text, specialSymBolHeading
+                    ]); 
+                    // 8. Scrollbar background 
+                    const scrollbarBg = this.scene.add.sprite( gameConfig.scale.width - 40, // Positioned on the right side 
+                        gameConfig.scale.height / 2, 'scrollBg' ).setOrigin(0.5).setDisplaySize(50, 600); // Adjust height as needed 
+                    popupContainer.add(scrollbarBg); 
+                    // 9. Roller image for the scrollbar 
+                    const roller = this.scene.add.image( gameConfig.scale.width - 40, gameConfig.scale.height / 2 - 200, 'scroller' ).setOrigin(0.5).setInteractive({ draggable: true }); 
+                    popupContainer.add(roller); 
+                    // 10. Add drag event listener to the roller 
+                    this.scene.input.setDraggable(roller); 
+                    roller.on('drag', (pointer: any, dragX: number, dragY: number) => {
+                        // Keep the roller within the scrollbar bounds
+                        const minY = scrollbarBg.getTopCenter().y + roller.height / 2;
+                        const maxY = scrollbarBg.getBottomCenter().y - roller.height / 2;
+                
+                        // Clamp roller position
+                        dragY = Phaser.Math.Clamp(dragY, minY, maxY);
+                        roller.y = dragY;
+                
+                        // Calculate the scroll percentage (0 to 1)
+                        const scrollPercent = (dragY - minY) / (maxY - minY);
+                
+                        // Map the scroll percentage to the content's Y position range
+                        const contentMaxY = 300; // The top position of content (relative to mask)
+                        const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
+                
+                        // Update scroll container's Y position based on scroll percentage
+                        scrollContainer.y = Phaser.Math.Interpolation.Linear([contentMaxY, contentMinY], scrollPercent);
+                    });
+        }
 
     buttonMusic(key: string){
         this.SoundManager.playSound(key)

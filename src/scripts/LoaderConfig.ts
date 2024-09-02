@@ -62,6 +62,8 @@ export const LoaderConfig = {
     scrollBg: "src/sprites/ScrollBar.png",
     scroller:"src/sprites/Roller.png",
     minorSymbolsHeading: "src/sprites/MoniorSymbols.png",
+    majorSymbolHeading: "src/sprites/MajorSymbolsHeading.png",
+    specialSymBolHeading: "src/sprites/SpecialSymbolHeading.png",
     
     slots0_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots0_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",
