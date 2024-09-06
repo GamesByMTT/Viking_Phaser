@@ -248,7 +248,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
                 // 1. Create the main popup container 
                 const popupContainer = this.scene.add.container(0, 0).setDepth(11); 
                 // 2. Add a background to the popup container 
-                const popupBackground = this.scene.add.sprite( gameConfig.scale.width / 2, gameConfig.scale.height / 2, "popupbg" ); popupBackground.setDisplaySize(1920, 1080); popupContainer.add(popupBackground); 
+                const popupBackground = this.scene.add.sprite( gameConfig.scale.width / 2, gameConfig.scale.height / 2, "popupbackgroumdImage" ); popupBackground.setDisplaySize(1920, 1080); popupContainer.add(popupBackground); 
                 // 3. Add a heading image to the popup container 
                 const headingImage = this.scene.add.image( gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 400, 'headingImage' ); popupContainer.add(headingImage); 
                 // 4. Add a close button to the popup 
@@ -363,7 +363,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         ).setDepth(1); // Set depth higher than blurGraphic
     
         // Popup background image
-        const popupBg = this.scene.add.image(0, 0, 'messagePopup').setDepth(10);
+        const popupBg = this.scene.add.image(0, 0, "logoutPop").setDepth(10);
         popupBg.setOrigin(0.5);
         popupBg.setDisplaySize(835, 677); // Set the size for your popup background
         popupBg.setAlpha(1); // Set background transparency
@@ -380,7 +380,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
             
             this.UiContainer.onSpin(false);
             Globals.Socket?.socket.emit("EXIT", {});
-            // window.parent.postMessage("onExit", "*");
+            window.parent.postMessage("onExit", "*");
             popupContainer.destroy();
             blurGraphic.destroy(); // Destroy blurGraphic when popup is closed
         }, 0, true);

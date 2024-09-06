@@ -39,6 +39,9 @@ export default class MainScene extends Scene {
         this.mainContainer = this.add.container();
         this.soundManager = new SoundManager(this)
 
+        console.log("ManinScene Loaded on Viking Phaser");
+        
+
         // Set up the stairs frame
         this.stairs = new Phaser.GameObjects.Sprite(this, width/2, height/1.08, 'stairs').setDepth(0)
         this.reelBg = new Phaser.GameObjects.Sprite(this, width/2, height/2.2, 'reelBg').setDepth(0)
@@ -146,7 +149,7 @@ export default class MainScene extends Scene {
                     this.showWinPopup(winAmount, 'hugeWinPopup')
                 } else if (winAmount >= 20 * betValue && winAmount < 25 * betValue) {
                     //MegawinPopup
-                    this.showWinPopup(winAmount, 'megaWinPopup')
+                    this.showWinPopup(winAmount, 'megaWin')
                 } else if(jackpot > 0) {
                    //jackpot Condition
                    this.showWinPopup(winAmount, 'jackpotPopup')
