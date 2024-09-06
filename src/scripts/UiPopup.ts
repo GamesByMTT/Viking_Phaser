@@ -274,46 +274,134 @@ export class UiPopups extends Phaser.GameObjects.Container {
                     );
                     scrollContainer.setMask(mask); // Apply the mask to the scroll container 
                     popupContainer.add(scrollContainer); 
-                    console.log("initData", initData.UIData.symbols);
+                    console.log("initData", initData.UIData.symbols);   
                     
                     // 7. Add the content that will be scrolled 
-                    const contentHeight = 2000; // Example content height, adjust as needed 
+                    const contentHeight = 3000; // Example content height, adjust as needed 
                     const content = this.scene.add.image( gameConfig.scale.width / 2, 100, 'minorSymbolsHeading' ).setOrigin(0.5).setDepth(2); 
+                    
                     const minSymbol1 = this.scene.add.image(350, 350, "slots0_0").setDepth(2).setScale(0.5) 
                     const minSymbol2 = this.scene.add.image(850, 350, "slots1_0").setDepth(2).setScale(0.5) 
                     const minSymbol3 = this.scene.add.image(1350, 350, "slots2_0").setDepth(2).setScale(0.5) 
-                    const minSymbol1Text = this.scene.add.text(450, 300, `5X - ${initData.UIData.symbols[0]} \n4X - 15 \n3X - 5`, TextStyle ) 
-                    const minSymbol2Text = this.scene.add.text(950, 300, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
-                    const minSymbol3Text = this.scene.add.text(1450, 300, '5X - 100 \n4X - 50 \n3X - 10', TextStyle ) 
                     const minSymbol4 = this.scene.add.image(650, 550, "slots3_0").setDepth(2).setScale(0.5) 
                     const minSymbol5 = this.scene.add.image(1050, 550, "slots4_0").setDepth(2).setScale(0.5) 
-                    const minSymbol4Text = this.scene.add.text(750, 500, '5X - 125 \n4X - 75 \n3X - 12', TextStyle ) 
-                    const minSymbol5Text = this.scene.add.text(1150, 500, '5X - 250 \n4X - 100 \n3X - 15', TextStyle ) 
-                     
-                    const majorSymbol1 = this.scene.add.image(650, 1100, "slots5_0").setDepth(2).setScale(0.5) 
-                    const majorSymbol1Text = this.scene.add.text(750, 1050, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
-                    const majorSymbol2 = this.scene.add.image(1050, 1100, "slots8_0").setDepth(2).setScale(0.5) 
-                    const majorSymbol2Text = this.scene.add.text(1150, 1050, '5X - 100 \n4X - 50 \n3X - 10', TextStyle ) 
-                    const majorSymbol3 = this.scene.add.image(650, 1300, "slots7_0").setDepth(2).setScale(0.5) 
-                    const majorSymbol3Text = this.scene.add.text(750, 1250, '5X - 70 \n4X - 25 \n3X - 8', TextStyle ) 
-                    const majorSymbol4 = this.scene.add.image(1050, 1300, "slots6_0").setDepth(2).setScale(0.5) 
-                    const majorSymbol4Text = this.scene.add.text(1150, 1250, '5X - 70 \n4X - 25 \n3X - 8', TextStyle )
-                   
-                    const specialSymBol1 = this.scene.add.image(200, 1750, "slots10_0").setDepth(2).setOrigin(0.5)
-                    const specialSymBol1Text = this.scene.add.text(100, 1700, "", TextStyle)
-                    const specialSymBol2 = this.scene.add.image(200, 1950, "slots12_0").setDepth(2).setOrigin(0.5)
 
-                    const specialSymBol2Text = this.scene.add.text(100, 1900, "", TextStyle)
+
+                    const infoIcons = [
+                        { x: 500, y: 300 }, // Position for infoIcon2
+                        { x: 1000, y: 300 }, // Position for infoIcon3
+                        { x: 1500, y: 300 }, //
+                        { x: 800, y: 500 }, //
+                        { x: 1200, y: 500 }, //
+                    ]
+                    const minorIcon = initData.UIData.symbols
+                    minorIcon.forEach((symbol, symbolIndex) => {
+                        // Get the corresponding infoIcon position
+                        const iconPosition = infoIcons[symbolIndex];
+                    
+                        if (!iconPosition) return; // Avoid undefined positions
+                    
+                        // Loop through each multiplier array (e.g., [100, 0], [50, 0])
+                        symbol.multiplier.slice(0, 4).forEach((multiplierValueArray, multiplierIndex) => {
+                            // Ensure multiplierValueArray is an array before accessing elements
+                            if (Array.isArray(multiplierValueArray)) {
+                                const multiplierValue = multiplierValueArray[0]; // Access the first value of the array
+                    
+                                if (multiplierValue > 0) {  // Only print if the value is greater than 0
+                                    // Determine the text (e.g., '5x', '4x', '2x')
+                                    const prefix = [5, 4, 2][multiplierIndex] || 1; // Customize this if needed
+                    
+                                    // Create the text content
+                                    const text = `${prefix}x ${multiplierValue}`;
+                    
+                                    // Create the text object
+                                    const textObject = this.scene.add.text(
+                                        iconPosition.x, // X position
+                                        iconPosition.y + multiplierIndex * 40, // Y position (spacing between lines)
+                                        text,
+                                        { fontSize: '30px', color: '#fff', align: "left" } // Customize text style
+                                    );
+                    
+                                    // Set line spacing and other styles
+                                    textObject.setLineSpacing(10);  // Adjust the line height as needed
+                                    textObject.setOrigin(0.5, 0.5); // Center the text if needed
+                    
+                                    // Add the text object to the scroll container
+                                    scrollContainer.add(textObject);
+                                }
+                            }
+                        });
+                        
+                    });
+                    
+                    
+                    const majorSymbol1 = this.scene.add.image(650, 1100, "slots5_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol2 = this.scene.add.image(1050, 1100, "slots6_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol3 = this.scene.add.image(650, 1300, "slots7_0").setDepth(2).setScale(0.5) 
+                    const majorSymbol4 = this.scene.add.image(1050, 1300, "slots8_0").setDepth(2).setScale(0.5) 
+                 
+                    const majorSymbol1Text = this.scene.add.text(750, 1050, '5X - 200 \n4X - 80 \n3X - 40', TextStyle ) 
+                    
+                    const majorSymbol2Text = this.scene.add.text(1150, 1050, '5X - 200 \n4X - 80 \n3X - 40', TextStyle ) 
+                    
+                    const majorSymbol3Text = this.scene.add.text(750, 1250, '5X - 200 \n4X - 80 \n3X - 10', TextStyle ) 
+                
+                    const majorSymbol4Text = this.scene.add.text(1150, 1250, '5X - 200 \n4X - 80 \n3X - 40', TextStyle )
+                   
+                    const specialSymBol1 = this.scene.add.image(200, 1750, "slots9_0").setDepth(2).setOrigin(0.5).setScale(0.5)
+                   
+                    const specialSymBol2 = this.scene.add.image(200, 1950, "slots10_0").setDepth(2).setOrigin(0.5).setScale(0.5)
+                    const specialSymBol3 = this.scene.add.image(200, 2150, "slots11_0").setDepth(2).setOrigin(0.5).setScale(0.5)
+                    const specialSymBol4 = this.scene.add.image(200, 2350, "slots12_0").setDepth(2).setOrigin(0.5).setScale(0.5)
+                    const specialSymBol5 = this.scene.add.image(200, 2550, "slots13_0").setDepth(2).setOrigin(0.5).setScale(0.5)
+
+                    const descriptionPos = [ 
+                        {x: 350, y: 1700},
+                        {x: 350, y: 1900},
+                        {x: 350, y: 2100},
+                        {x: 350, y: 2300},
+                        {x: 350, y: 2500},
+                    ]
+
+                    for (let i = 9; i <= 13; i++) {
+                        const symbol = initData.UIData.symbols[i];
+                        if (symbol) {
+                            console.log(`Index ${i}: ${symbol.description}`);
+                            const position = descriptionPos[i - 9];
+                            const descriptionText = `${symbol.description}`;
+                            console.log(descriptionText,"descriptionText", position);
+                            
+                            // Create the text object
+                           const descriptionObject = this.scene.add.text(
+                                    position.x, // X position
+                                    position.y +  40, // Y position (spacing between lines)
+                                    descriptionText,
+                                 { fontSize: '30px', color: '#fff', align: "left",  wordWrap: { width: 1200, useAdvancedWrap: true }} // Customize text style
+                            );
+                            descriptionObject.setLineSpacing(10);  // Adjust the line height as needed
+                            descriptionObject.setOrigin(0, 0.5); // Center the text if needed
+                            scrollContainer.add(descriptionObject)
+                        } else {
+                            console.log(`Symbol at index ${i} does not exist.`);
+                        }
+                    }
+
+
                     const MajorSymBolHeading = this.scene.add.image( gameConfig.scale.width / 2, 800, 'majorSymbolHeading' ).setOrigin(0.5).setDepth(2);
                     const specialSymBolHeading = this.scene.add.image(gameConfig.scale.width / 2, 1550, "specialSymBolHeading").setDepth(2).setOrigin(0.5)
-                    scrollContainer.add([content,minSymbol1, minSymbol1Text, minSymbol2,minSymbol2Text, 
-                        minSymbol3, minSymbol3Text, minSymbol4, minSymbol4Text, minSymbol5, minSymbol5Text, 
+
+                    const payLines = this.scene.add.image( gameConfig.scale.width / 2, 3000, 'payLines' ).setOrigin(0.5).setDepth(2);
+
+                    payLines
+                    scrollContainer.add([content,minSymbol1,minSymbol2,
+                        minSymbol3,  minSymbol4,  minSymbol5,
                         MajorSymBolHeading, majorSymbol1, majorSymbol1Text, majorSymbol2, majorSymbol2Text, 
-                        majorSymbol3, majorSymbol3Text, majorSymbol4, majorSymbol4Text, specialSymBolHeading
+                        majorSymbol3,majorSymbol3Text, majorSymbol4, majorSymbol4Text, specialSymBolHeading, specialSymBol1, specialSymBol2, specialSymBol3, specialSymBol4, specialSymBol5, 
+                         payLines
                     ]); 
                     // 8. Scrollbar background 
                     const scrollbarBg = this.scene.add.sprite( gameConfig.scale.width - 40, // Positioned on the right side 
-                        gameConfig.scale.height / 2, 'scrollBg' ).setOrigin(0.5).setDisplaySize(50, 600); // Adjust height as needed 
+                        gameConfig.scale.height / 2, 'scrollBg' ).setOrigin(0.5).setDisplaySize(50, 700); // Adjust height as needed 
                     popupContainer.add(scrollbarBg); 
                     // 9. Roller image for the scrollbar 
                     const roller = this.scene.add.image( gameConfig.scale.width - 40, gameConfig.scale.height / 2 - 200, 'scroller' ).setOrigin(0.5).setInteractive({ draggable: true }); 
@@ -333,7 +421,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
                         const scrollPercent = (dragY - minY) / (maxY - minY);
                 
                         // Map the scroll percentage to the content's Y position range
-                        const contentMaxY = 300; // The top position of content (relative to mask)
+                        const contentMaxY = 150; // The top position of content (relative to mask)
                         const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
                 
                         // Update scroll container's Y position based on scroll percentage
@@ -377,6 +465,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
             this.scene.textures.get("normalButton")
         ];
         this.yesBtn = new InteractiveBtn(this.scene, logoutButtonSprite, () => {
+            console.log("Hihihi", window);
             
             this.UiContainer.onSpin(false);
             Globals.Socket?.socket.emit("EXIT", {});

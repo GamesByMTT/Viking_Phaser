@@ -48,16 +48,14 @@ export class SocketManager {
 
     this.socket.on("connect", () => {
       console.log("Connected to the server");
-
-
       this.socket.on("message", (message : any) => {
         const data = JSON.parse(message);
         // console.log(`Message ID : ${data.id} |||||| Message Data : ${JSON.stringify(data.message)}`);
+        console.log("Message ID", data);
+        
         if(data.id == "InitData" ) {
-          console.log(counter, "Socket");
           if(initData.gameData.Bets.length != 0){
-
-            
+            initData.UIData.symbols = data.message.UIData.payLines.symbol
           }
           else{
             initData.gameData = data.message.GameData;
