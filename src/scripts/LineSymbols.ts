@@ -4,7 +4,7 @@ import { gameConfig } from "./appconfig";
 import { LineGenerator } from "./Lines";
 
 export default class LineSymbols extends Phaser.GameObjects.Container{
-    numberArr: Phaser.GameObjects.Text[] = [];
+    numberArr: Phaser.GameObjects.Container[] = [];
     linesGenerator!: LineGenerator; // Reference to LineGenerator
     numberContainers!: Phaser.GameObjects.Container
     constructor(scene: Phaser.Scene, yOf: number, xOf: number, linesGenerator: LineGenerator) {
@@ -23,40 +23,45 @@ export default class LineSymbols extends Phaser.GameObjects.Container{
         scene.add.existing(this);
     }
 
-    createNumber(scene: Phaser.Scene, index: number): Phaser.GameObjects.Text {
+    createNumber(scene: Phaser.Scene, index: number): Phaser.GameObjects.Container {
         const numberContainer = new Phaser.GameObjects.Container(scene);
         
         let xPosition;
-        
         let yPosition = 0;
-        let numberBg = scene.add.sprite(0, 0, "lineSymbols")
+        
         // Determine x position based on even or odd index
         if (index % 2 === 0) {
-            // Even numbers (0, 2, 4, 6, 8, etc.) go on one side
-            xPosition = - gameConfig.scale.width/3.75;
+            xPosition = -gameConfig.scale.width / 3.75;
             yPosition = (index / 2) * 60 - 150;  // Staggered downwards for each even number
-            numberContainer.add(numberBg.setPosition(gameConfig.scale.width/4.3, yPosition + 380));
         } else {
-            // Odd numbers (1, 3, 5, 7, 9, etc.) go on the opposite side
-            xPosition = gameConfig.scale.width/3.79;
-            yPosition =  ((index - 1) / 2) * 60 - 150;  // Staggered downwards for each odd number
-            numberContainer.add(numberBg.setPosition(gameConfig.scale.width / 1.31, yPosition + 380))
+            xPosition = gameConfig.scale.width / 3.79;
+            yPosition = ((index - 1) / 2) * 60 - 150;  // Staggered downwards for each odd number
         }
-
+    
+        // Add a background sprite behind the number
+        let numberBg = scene.add.sprite(xPosition - 2, yPosition + 3, "lineSymbols")
+            .setOrigin(0.5, 0.5)
+            .setDepth(0);  // Set depth lower than the text to make it behind
+    
         // Create a text object for each number
         let numberText = scene.add.text(xPosition, yPosition, (index + 1).toString(), {
-            font: "24px",
+            font: "22px",
             color: "#ffffff",
-            align: 'center',    
-        }).setOrigin(0.5, 0.5).setDepth(12);
-        numberContainer.add(numberText)
+            align: 'Center',            
+        }).setOrigin(0.5, 0.5).setDepth(1);  // Text on top of the background
+    
+        // Add the sprite and text to the container
+        numberContainer.add([numberBg, numberText]);
+    
         // Enable input on the number text
-        numberText.setInteractive({ useHandCursor: true }).setDepth(5);
-        
+        numberText.setInteractive({ useHandCursor: true });
+    
         // Add hover event listeners
         numberText.on("pointerover", () => this.showLines(index));
         numberText.on("pointerout", () => this.hideLines());
-        return numberText;
+    
+        // Return the container which includes both the background and the number text
+        return numberContainer;
     }
     showLines(index: number) {
         // Example: show lines related to the number
