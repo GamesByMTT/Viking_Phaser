@@ -370,17 +370,17 @@ export class UiPopups extends Phaser.GameObjects.Container {
                     ]); 
                     // 8. Scrollbar background 
                     const scrollbarBg = this.scene.add.sprite( gameConfig.scale.width - 40, // Positioned on the right side 
-                        gameConfig.scale.height / 2, 'scrollBg' ).setOrigin(0.5).setDisplaySize(50, 700); // Adjust height as needed 
+                        gameConfig.scale.height / 2, 'scrollBg' ).setOrigin(0.5).setDisplaySize(55, 740); // Adjust height as needed 
                     popupContainer.add(scrollbarBg); 
                     // 9. Roller image for the scrollbar 
-                    const roller = this.scene.add.image( gameConfig.scale.width - 40, gameConfig.scale.height / 2 - 200, 'scroller' ).setOrigin(0.5).setInteractive({ draggable: true }); 
+                    const roller = this.scene.add.image( gameConfig.scale.width - 40, gameConfig.scale.height / 2 - 200, 'scroller' ).setOrigin(0.5).setInteractive({ draggable: true }).setScale(1, 0.8); 
                     popupContainer.add(roller); 
                     // 10. Add drag event listener to the roller 
                     this.scene.input.setDraggable(roller); 
                     roller.on('drag', (pointer: any, dragX: number, dragY: number) => {
                         // Keep the roller within the scrollbar bounds
-                        const minY = scrollbarBg.getTopCenter().y + roller.height / 2;
-                        const maxY = scrollbarBg.getBottomCenter().y - roller.height / 2;
+                        const minY = scrollbarBg.getTopCenter().y + roller.height / 2 + 20;
+                        const maxY = scrollbarBg.getBottomCenter().y - roller.height ;
                 
                         // Clamp roller position
                         dragY = Phaser.Math.Clamp(dragY, minY, maxY);
@@ -390,9 +390,26 @@ export class UiPopups extends Phaser.GameObjects.Container {
                         const scrollPercent = (dragY - minY) / (maxY - minY);
                 
                         // Map the scroll percentage to the content's Y position range
-                        const contentMaxY = 150; // The top position of content (relative to mask)
+                        const contentMaxY = 140; // The top position of content (relative to mask)
                         const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
                 
+                        // Update scroll container's Y position based on scroll percentage
+                        scrollContainer.y = Phaser.Math.Interpolation.Linear([contentMaxY, contentMinY], scrollPercent);
+                    });
+
+                    this.scene.input.on('wheel', (pointer: any, gameObjects: any, deltaX: number, deltaY: number) => {
+                        const minY = scrollbarBg.getTopCenter().y + roller.height / 2;
+                        const maxY = scrollbarBg.getBottomCenter().y - roller.height / 2;
+                
+                        // Adjust roller Y position based on mouse wheel movement
+                        let newY = roller.y + deltaY * 0.1; // Adjust speed of scroll
+                        newY = Phaser.Math.Clamp(newY, minY, maxY);
+                        roller.y = newY;
+                        // Calculate the scroll percentage (0 to 1)
+                        const scrollPercent = (newY - minY) / (maxY - minY);
+                        // Map the scroll percentage to the content's Y position range
+                        const contentMaxY = 300; // The top position of content (relative to mask)
+                        const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
                         // Update scroll container's Y position based on scroll percentage
                         scrollContainer.y = Phaser.Math.Interpolation.Linear([contentMaxY, contentMinY], scrollPercent);
                     });
