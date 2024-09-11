@@ -38,18 +38,16 @@ export default class MainScene extends Scene {
         // Initialize main container
         this.mainContainer = this.add.container();
         this.soundManager = new SoundManager(this)
-
-        console.log("ManinScene Loaded on Viking Phaser");
         
 
         // Set up the stairs frame
         this.stairs = new Phaser.GameObjects.Sprite(this, width/2, height/1.08, 'stairs').setDepth(0)
-        this.reelBg = new Phaser.GameObjects.Sprite(this, width/2, height/2.2, 'reelBg').setDepth(0)
+        this.reelBg = new Phaser.GameObjects.Sprite(this, width/2, height/2.1, 'reelBg').setDepth(0)
         this.roofTop = new Phaser.GameObjects.Sprite(this, width/2, height * 0.11, 'roof').setDepth(2)
         this.columnleft = new Phaser.GameObjects.Sprite(this, width/4.3, height/2.2, 'column').setDepth(1)
         this.columnRight = new Phaser.GameObjects.Sprite(this, width/1.31, height/2.2, 'column').setDepth(1)
         this.snow = new Phaser.GameObjects.Sprite(this, width/2, height/2.4, 'snow')
-        
+        this.reelBg.setDisplaySize(913, 570)
         this.mainContainer.add([this.reelBg, this.roofTop, this.snow, this.stairs, this.columnleft, this.columnRight])
         this.soundManager.playSound("backgroundMusic")
 
@@ -111,7 +109,7 @@ export default class MainScene extends Scene {
     recievedMessage(msgType: string, msgParams: any) {
         if (msgType === 'ResultData') {
             this.time.delayedCall(1000, () => {    
-                if (ResultData.gameData.BonusStopIndex > -1) {
+                if (ResultData.gameData.isBonus) {
                     setTimeout(() => {
                         Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
                     }, 2000);
@@ -240,7 +238,7 @@ export default class MainScene extends Scene {
         this.tweens.addCounter({
             from: 0,
             to: freeSpinCount,
-            duration: 1000, // Duration of the animation in milliseconds
+            duration: 500, // Duration of the animation in milliseconds
             onUpdate: (tween) => {
                 const value = Math.floor(tween.getValue());
                 freeText.setText(value.toString());
