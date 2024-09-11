@@ -47,8 +47,8 @@ export default class MainScene extends Scene {
         this.columnleft = new Phaser.GameObjects.Sprite(this, width/4.3, height/2.2, 'column').setDepth(1)
         this.columnRight = new Phaser.GameObjects.Sprite(this, width/1.31, height/2.2, 'column').setDepth(1)
         this.snow = new Phaser.GameObjects.Sprite(this, width/2, height/2.4, 'snow')
-        this.reelBg.setDisplaySize(913, 570)
-        this.mainContainer.add([this.reelBg, this.roofTop, this.snow, this.stairs, this.columnleft, this.columnRight])
+        this.reelBg.setDisplaySize(913, 600)
+        this.mainContainer.add([ this.roofTop, this.snow, this.stairs, this.reelBg, this.columnleft, this.columnRight])
         this.soundManager.playSound("backgroundMusic")
 
         // Initialize UI Container

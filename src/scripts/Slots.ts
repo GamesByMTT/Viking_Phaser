@@ -30,7 +30,7 @@ export class Slots extends Phaser.GameObjects.Container {
         this.slotMask = new Phaser.GameObjects.Graphics(scene);
         
         this.maskWidth = gameConfig.scale.width / 1.8;
-        this.maskHeight = 480;
+        this.maskHeight = 500;
         this.slotMask.fillStyle(0xffffff, 1);
         this.slotMask.fillRoundedRect(0, 0, this.maskWidth, this.maskHeight, 20);
         // mask Position set
@@ -252,18 +252,14 @@ class Symbols {
         // Create a bounce effect for the reelContainer
         this.bouncingTween = this.scene.tweens.add({
             targets: this.reelContainer,
-            y: this.reelContainer.height + 20, // Move reelContainer upwards by 20 units
-            ease: 'Elastic.easeOut', // Bounce easing function
-            duration: 800, // Duration of the bounce effect
+            y: this.reelContainer.height + 15, // Move reelContainer upwards by 20 units
+            ease: 'Back.easeOut', // Bounce easing function
+            duration: 400, // Duration of the bounce effect
             yoyo: true, // Make it bounce back and forth
-            repeat: 5, // Repeat once (you can adjust or remove if needed)
+            repeat: 1, // Repeat once (you can adjust or remove if needed)
             onComplete: () => {
-                this.scene.tweens.add({
-                    targets: this.reelContainer,
-                    y: this.reelContainer.height, 
-                })
-                // Set the final position of the reelContainer
-                this.reelContainer.setPosition(this.reelContainer.x, finalPositionY - 40);
+                 this.reelContainer.setPosition(this.reelContainer.x, finalPositionY);
+                 // Set the final position of the reelContainer
             }
         });
        }
@@ -318,7 +314,7 @@ class Symbols {
     
     update(delta: number) {
         // Update the Y position based on movement speed or delta
-        const moveSpeed = 100; // You can adjust this speed value as needed
+        const moveSpeed = 80; // You can adjust this speed value as needed
         if (this.startMoving) {
             // Move the reel container upwards
             this.reelContainer.y += moveSpeed * delta / 1000; // Convert delta to seconds
@@ -333,7 +329,7 @@ class Symbols {
                 if (this.bouncingTween) {
                     this.bouncingTween.stop();
                 }
-            }, 500);
+            }, 1000);
             
         }
     }
