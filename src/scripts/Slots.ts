@@ -165,38 +165,20 @@ export class Slots extends Phaser.GameObjects.Container {
                     }
                 });
             });
-        }, maxDelay + 100); // Ensure resultCallBack is called after all reels stop
+        }, maxDelay + 200); // Ensure resultCallBack is called after all reels stop
     
         // Iterate over reelContainers and stop them with a delay
-        for (let i = 0; i < this.reelContainers.length; i++) {
-            setTimeout(() => {
-                this.stopReel(this.reelContainers[i], i);
-            }, 100 * i); // Delay each reel stop by 200ms times its index
+        for (let i = 0; i < this.slotSymbols.length; i++) {
+            for (let j = 0; j < this.slotSymbols[i].length; j++) {
+              setTimeout(() => {
+                    this.slotSymbols[i][j].endTween();
+                }, 200 * i);
+            }
         }
     }
     
     stopReel(reelContainer: Phaser.GameObjects.Container, reelIndex: number) {
-        // Stop the motion of the reelContaine
-        this.scene.tweens.add({
-            targets: this.slotSymbols,
-            y: 0, // Move reel container to its final position
-            ease: 'Bounce.easeIn', // Use the bounce easing for the effect
-            duration: 100, // Duration of the bounce effect
-            repeat: 1,
-            yoyo: true,
-            onComplete: () => {
-                // this.reelContainer.setPosition(this.reelContainer.x, finalPositionY);
-            }
-        });
-               for (let i = 0; i < this.slotSymbols.length; i++) {
-                    for (let j = 0; j < this.slotSymbols[i].length; j++) {
-                      setTimeout(() => {
-                            this.slotSymbols[i][j].endTween();
-                        }, 100 * i);
-                    }
-                }
-            
-    
+        
     }
     // winMusic
     winMusic(key: string){
@@ -253,10 +235,8 @@ class Symbols {
         this.bouncingTween = this.scene.tweens.add({
             targets: this.reelContainer,
             y: this.reelContainer.height + 15, // Move reelContainer upwards by 20 units
-            ease: 'Back.easeOut', // Bounce easing function
-            duration: 400, // Duration of the bounce effect
-            yoyo: true, // Make it bounce back and forth
-            repeat: 1, // Repeat once (you can adjust or remove if needed)
+            ease: 'Elastic.easeOut', // Bounce easing function
+            duration: 600, // Duration of the bounce effect
             onComplete: () => {
                  this.reelContainer.setPosition(this.reelContainer.x, finalPositionY);
                  // Set the final position of the reelContainer
@@ -313,13 +293,10 @@ class Symbols {
     }
     
     update(delta: number) {
-        // Update the Y position based on movement speed or delta
         const moveSpeed = 80; // You can adjust this speed value as needed
         if (this.startMoving) {
             // Move the reel container upwards
             this.reelContainer.y += moveSpeed * delta / 1000; // Convert delta to seconds
-    
-            // Check if the reel container has moved past its upper bound
             if (this.reelContainer.y >= (this.isMobile ? window.innerHeight * 2 : window.innerHeight * 0.2)) {
                  this.reelContainer.y = 0;
             }
@@ -329,7 +306,7 @@ class Symbols {
                 if (this.bouncingTween) {
                     this.bouncingTween.stop();
                 }
-            }, 1000);
+            }, 500);
             
         }
     }
