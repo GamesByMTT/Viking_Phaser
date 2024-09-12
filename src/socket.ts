@@ -55,7 +55,7 @@ export class SocketManager {
         
         if(data.id == "InitData" ) {
           if(initData.gameData.Bets.length != 0){
-            initData.UIData.symbols = data.message.UIData.payLines.symbol
+            initData.UIData.symbols = data.message.UIData.payLines.symbols
           }
           else{
             initData.gameData = data.message.GameData;

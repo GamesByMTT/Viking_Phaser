@@ -30,7 +30,7 @@ export class Slots extends Phaser.GameObjects.Container {
         this.slotMask = new Phaser.GameObjects.Graphics(scene);
         
         this.maskWidth = gameConfig.scale.width / 1.8;
-        this.maskHeight = 500;
+        this.maskHeight = 470;
         this.slotMask.fillStyle(0xffffff, 1);
         this.slotMask.fillRoundedRect(0, 0, this.maskWidth, this.maskHeight, 20);
         // mask Position set
@@ -52,16 +52,13 @@ export class Slots extends Phaser.GameObjects.Container {
             x: gameConfig.scale.width / 3.1,
             y: gameConfig.scale.height /3.25     
         };
-        const totalSymbol = 8;
+        const totalSymbol = 5;
         const visibleSymbol = 3;
         const startIndex = 1;
         const initialYOffset = (totalSymbol - startIndex - visibleSymbol) * this.spacingY;
-        console.log(initialYOffset, "initialYOffset");
-        
         for (let i = 0; i < 5; i++) { // 5 columns
             const reelContainer = new Phaser.GameObjects.Container(scene);
             this.reelContainers.push(reelContainer); // Store the container for future use
-            
             this.slotSymbols[i] = [];
             for (let j = 0; j < 28; j++) { // 3 rows
                 let symbolKey = this.getRandomSymbolKey(); // Get a random symbol key
@@ -78,8 +75,8 @@ export class Slots extends Phaser.GameObjects.Container {
                 reelContainer.add(slot.symbol)
             }
             
+            reelContainer.setPosition(reelContainer.x, -initialYOffset );
             
-            reelContainer.setPosition(reelContainer.x, -initialYOffset + 20);
             this.add(reelContainer); 
         }
     }
@@ -145,10 +142,7 @@ export class Slots extends Phaser.GameObjects.Container {
     }
 
     stopTween() {
-        // Calculate the maximum delay for stopping the reels
         const maxDelay = 200 * (this.reelContainers.length - 1);
-    
-        // Call resultCallBack after all tweens finish
         setTimeout(() => {
             this.resultCallBack();
             this.moveSlots = false;
@@ -169,15 +163,15 @@ export class Slots extends Phaser.GameObjects.Container {
     
         // Iterate over reelContainers and stop them with a delay
         for (let i = 0; i < this.slotSymbols.length; i++) {
+             // Increase delay between reels
             for (let j = 0; j < this.slotSymbols[i].length; j++) {
-              setTimeout(() => {
+                const reelDelay = 200 * i;
+                const symbolDelay = reelDelay + (50 * i);  // Smaller delay between symbols within the same reel
+                setTimeout(() => {
                     this.slotSymbols[i][j].endTween();
-                }, 200 * i);
+                }, symbolDelay);
             }
         }
-    }
-    
-    stopReel(reelContainer: Phaser.GameObjects.Container, reelIndex: number) {
         
     }
     // winMusic
@@ -225,24 +219,7 @@ class Symbols {
         });        
     }
 
-    createBounceTween(){
-        const finalPositionY = 0;
-        if (this.bouncingTween) {
-            this.bouncingTween.stop();
-        }
-        
-        // Create a bounce effect for the reelContainer
-        this.bouncingTween = this.scene.tweens.add({
-            targets: this.reelContainer,
-            y: this.reelContainer.height + 15, // Move reelContainer upwards by 20 units
-            ease: 'Elastic.easeOut', // Bounce easing function
-            duration: 600, // Duration of the bounce effect
-            onComplete: () => {
-                 this.reelContainer.setPosition(this.reelContainer.x, finalPositionY);
-                 // Set the final position of the reelContainer
-            }
-        });
-       }
+    
     // to update the slotx_0 to show the 0 index image at the end
     updateKeyToZero(symbolKey: string): string {
         const match = symbolKey.match(/^slots(\d+)_\d+$/);
@@ -266,11 +243,11 @@ class Symbols {
             let textureKeys: string[] = [];
             // Retrieve the elementId based on index
             const elementId = ResultData.gameData.ResultReel[this.index.y][this.index.x];
-                for (let i = 0; i <28; i++) {
+                for (let i = 0; i < 15; i++) {
                     const textureKey = `slots${elementId}_${i}`;
                     // Check if the texture exists in cache
                     if (this.scene.textures.exists(textureKey)) {
-                        textureKeys.push(textureKey);
+                        textureKeys.push(textureKey);                        
                     } 
                 }
                 // Check if we have texture keys to set
@@ -283,24 +260,43 @@ class Symbols {
                             repeat: -1
                         });
                     // Set the texture to the first key and start the animation
-                        this.symbol.setTexture(textureKeys[0]);               
+                        this.symbol.setTexture(textureKeys[0]);           
                     }
         }
         // Stop moving and start tweening the sprite's position
         this.startMoving = false;
-        const finalPositionY = 0;
-        this.reelContainer.setPosition(this.reelContainer.x, finalPositionY);
+
+        this.bouncingTween = this.scene.tweens.add({
+            targets: this.reelContainer,
+            // y: this.reelContainer.height,
+            ease: 'Elastic.easeOut', // Bounce easing function
+            duration: 400, // Duration of the bounce effect
+            onComplete: () => {
+                this.scene.tweens.add({
+                    targets: this.reelContainer,
+                    y: this.reelContainer.height,
+                    ease: 'Back.easeIn',
+                    duration: 500,
+                    onComplete: () =>{
+                        console.log("inisde tween Complete");
+                        
+                    }
+                })
+                
+            }
+        });
     }
     
     update(delta: number) {
         const moveSpeed = 80; // You can adjust this speed value as needed
         if (this.startMoving) {
             // Move the reel container upwards
+            // console.log("this.reelContainer.y");
+            
             this.reelContainer.y += moveSpeed * delta / 1000; // Convert delta to seconds
-            if (this.reelContainer.y >= (this.isMobile ? window.innerHeight * 2 : window.innerHeight * 0.2)) {
-                 this.reelContainer.y = 0;
+            if (this.reelContainer.y >= (this.isMobile ? window.innerHeight * 1.9: window.innerHeight * 1.8 )) {
+                 this.reelContainer.y = -4000;
             }
-            this.createBounceTween()
         }else{
             setTimeout(() => {
                 if (this.bouncingTween) {

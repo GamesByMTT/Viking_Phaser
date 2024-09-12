@@ -13,7 +13,7 @@ if(!IS_DEV){
       // console.log("event check", event.data);
       const data = { 
         socketUrl : event.data.socketURL,
-        authToken :  event.data.cookie
+      authToken :  event.data.cookie
       }
       // Call the provided callback function
       Globals.Socket = new SocketManager();
