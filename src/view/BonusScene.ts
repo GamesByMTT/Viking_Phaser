@@ -25,7 +25,7 @@ export default class BonusScene extends Scene{
         
     }
     create(){
-        console.log(values, "values");
+        // console.log(values, "values");
         const { width, height } = this.cameras.main;
         this.bonusContainer = this.add.container();
         this.SceneBg = new Phaser.GameObjects.Sprite(this, width/2, height/2, 'Background').setDisplaySize(width, height)
@@ -55,7 +55,7 @@ export default class BonusScene extends Scene{
        
         let segments = initData.gameData.BonusData.length;
         let anglePerSegment = 360 / segments;
-        console.log("anglePerSegment", anglePerSegment);
+        // console.log("anglePerSegment", anglePerSegment); 
         
         for(let i=0; i< segments; i++){
             let startAngle = Phaser.Math.DegToRad(i * anglePerSegment);
@@ -99,10 +99,10 @@ export default class BonusScene extends Scene{
     
         // Calculate random spins before landing on target
         let randomSpins = Phaser.Math.Between(2, 5);
-        console.log(randomSpins, "randomSpins");
+        // console.log(randomSpins, "randomSpins");
         
         let totalRotation = randomSpins * 360 + targetAngle;  // Total rotation including full spins
-        console.log(totalRotation, "totalRotation", targetAngle) ;
+        // console.log(totalRotation, "totalRotation", targetAngle) ;
         
         // Spin the wheel
         this.tweens.add({

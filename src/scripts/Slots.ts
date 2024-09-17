@@ -2,7 +2,6 @@ import Phaser from 'phaser';
 import { Globals, ResultData, initData } from "./Globals";
 import { gameConfig } from './appconfig';
 import { UiContainer } from './UiContainer';
-import { Easing, Tween } from "@tweenjs/tween.js"; // If using TWEEN for animations
 import SoundManager from './SoundManager';
 export class Slots extends Phaser.GameObjects.Container {
     slotMask: Phaser.GameObjects.Graphics;
@@ -30,13 +29,13 @@ export class Slots extends Phaser.GameObjects.Container {
         this.slotMask = new Phaser.GameObjects.Graphics(scene);
         
         this.maskWidth = gameConfig.scale.width / 1.8;
-        this.maskHeight = 470;
+        this.maskHeight = 490;
         this.slotMask.fillStyle(0xffffff, 1);
         this.slotMask.fillRoundedRect(0, 0, this.maskWidth, this.maskHeight, 20);
         // mask Position set
         this.slotMask.setPosition(
             gameConfig.scale.width / 4,
-            gameConfig.scale.height /4.1 
+            gameConfig.scale.height /4.4
         );
         // this.add(this.slotMask);
         // Filter and pick symbol keys based on the criteria
@@ -52,7 +51,7 @@ export class Slots extends Phaser.GameObjects.Container {
             x: gameConfig.scale.width / 3.1,
             y: gameConfig.scale.height /3.25     
         };
-        const totalSymbol = 5;
+        const totalSymbol = 7;
         const visibleSymbol = 3;
         const startIndex = 1;
         const initialYOffset = (totalSymbol - startIndex - visibleSymbol) * this.spacingY;
@@ -74,7 +73,7 @@ export class Slots extends Phaser.GameObjects.Container {
                 this.slotSymbols[i].push(slot);
                 reelContainer.add(slot.symbol)
             }
-            
+            reelContainer.height = this.slotSymbols[i].length * this.spacingY; 
             reelContainer.setPosition(reelContainer.x, -initialYOffset );
             
             this.add(reelContainer); 
@@ -117,62 +116,87 @@ export class Slots extends Phaser.GameObjects.Container {
          
         for (let i = 0; i < this.reelContainers.length; i++) {
             for (let j = 0; j < this.reelContainers[i].list.length; j++) {
-                // setTimeout(() => {
+                setTimeout(() => {
                     this.slotSymbols[i][j].startMoving = true;
                     if (j < 3) this.slotSymbols[i][j].stopAnimation();
-                // }, 100 * i);
+                }, 100 * i);
             }
         }
         this.uiContainer.maxbetBtn.disableInteractive();
         this.moveSlots = true;
     }
-
     update(time: number, delta: number) {
-        
         if (this.slotSymbols && this.moveSlots) {
             for (let i = 0; i < this.reelContainers.length; i++) {
                 // Update the position of the entire reel container (move the reel upwards)
-                for (let j = 0; j < this.slotSymbols[i].length; j++) {
-                    // Update each symbol in the reel
-                    this.slotSymbols[i][j].update(delta);
+                this.reelContainers[i].y += 2000 * delta / 1000; 
+
+                // Seamless looping: Reset position when the top goes offscreen
+                if (this.reelContainers[i].y >= this.maskHeight) {
+                    this.reelContainers[i].y = this.reelContainers[i].y - this.reelContainers[i].height; 
                 }
             }
-          
         }
     }
 
     stopTween() {
-        const maxDelay = 200 * (this.reelContainers.length - 1);
-        setTimeout(() => {
-            this.resultCallBack();
-            this.moveSlots = false;
-    
-            ResultData.gameData.symbolsToEmit.forEach((rowArray: any) => {
-                rowArray.forEach((row: any) => {
-                    if (typeof row === "string") {
-                        const [y, x]: number[] = row.split(",").map((value) => parseInt(value));
-                        const animationId = `symbol_anim_${ResultData.gameData.ResultReel[x][y]}`;
-                        if (this.slotSymbols[y] && this.slotSymbols[y][x]) {
-                            this.winMusic("winMusic");
-                            this.slotSymbols[y][x].playAnimation(animationId);
-                        }
-                    }
+        // const maxDelay = 300 * (this.reelContainers.length - 1)
+
+        const reelStopDelay = 70; // Delay between each reel stop
+
+        const stopReel = (reelIndex: number) => {
+            const reel = this.reelContainers[reelIndex];
+            const reelDelay = reelStopDelay * (reelIndex * 0.8);
+            for (let j = 0; j < this.slotSymbols[reelIndex].length; j++) {
+                 this.scene.time.delayedCall(380, () => { // Example: 50ms delay
+                    this.moveSlots = false;
                 });
-            });
-        }, maxDelay + 200); // Ensure resultCallBack is called after all reels stop
-    
-        // Iterate over reelContainers and stop them with a delay
-        for (let i = 0; i < this.slotSymbols.length; i++) {
-             // Increase delay between reels
-            for (let j = 0; j < this.slotSymbols[i].length; j++) {
-                const reelDelay = 200 * i;
-                const symbolDelay = reelDelay + (50 * i);  // Smaller delay between symbols within the same reel
-                setTimeout(() => {
-                    this.slotSymbols[i][j].endTween();
-                }, symbolDelay);
+                // endTween to replace the sprite according to 
+                this.slotSymbols[reelIndex][j].endTween();
             }
+            // Calculate the target Y position 
+            const visibleAreaHeight = 3 * this.spacingY; 
+            const numReelHeights = Math.ceil(reel.y / visibleAreaHeight);
+            const targetY = -(numReelHeights * visibleAreaHeight); 
+            
+    
+            this.scene.tweens.add({
+                targets: reel,
+                delay: reelDelay, // Apply the delay here
+                y: {
+                    from:targetY - 380,
+                    to: targetY ,
+                    duration: 600, 
+                    ease: 'Sine.easeOut'
+                },
+                onComplete: () => {
+                    if (reelIndex === this.reelContainers.length - 1) {  
+                        this.playWinAnimations();
+                    } 
+                }
+            });   
+        };
+        for (let i = 0; i < this.reelContainers.length; i++) { 
+            stopReel(i);   
         }
-        
+    }
+
+    // Function to play win animations
+    playWinAnimations() {
+       
+        this.resultCallBack(); // Call the result callback
+        ResultData.gameData.symbolsToEmit.forEach((rowArray: any) => {
+            rowArray.forEach((row: any) => {
+                if (typeof row === "string") {
+                    const [y, x]: number[] = row.split(",").map((value) => parseInt(value));
+                    const animationId = `symbol_anim_${ResultData.gameData.ResultReel[x][y]}`;
+                    if (this.slotSymbols[y] && this.slotSymbols[y][x]) {
+                        this.winMusic("winMusic");
+                        this.slotSymbols[y][x].playAnimation(animationId);
+                    }
+                }
+            });
+        });
     }
     // winMusic
     winMusic(key: string){
@@ -219,7 +243,6 @@ class Symbols {
         });        
     }
 
-    
     // to update the slotx_0 to show the 0 index image at the end
     updateKeyToZero(symbolKey: string): string {
         const match = symbolKey.match(/^slots(\d+)_\d+$/);
@@ -237,8 +260,7 @@ class Symbols {
         this.symbol.anims.stop();
         this.symbol.setFrame(0);
     }
-      endTween() {
-       
+    endTween() {
         if (this.index.y < 3) {
             let textureKeys: string[] = [];
             // Retrieve the elementId based on index
@@ -264,46 +286,9 @@ class Symbols {
                     }
         }
         // Stop moving and start tweening the sprite's position
-        this.startMoving = false;
-
-        this.bouncingTween = this.scene.tweens.add({
-            targets: this.reelContainer,
-            // y: this.reelContainer.height,
-            ease: 'Elastic.easeOut', // Bounce easing function
-            duration: 400, // Duration of the bounce effect
-            onComplete: () => {
-                this.scene.tweens.add({
-                    targets: this.reelContainer,
-                    y: this.reelContainer.height,
-                    ease: 'Back.easeIn',
-                    duration: 500,
-                    onComplete: () =>{
-                        console.log("inisde tween Complete");
-                        
-                    }
-                })
-                
-            }
+        this.scene.time.delayedCall(50, () => { // Example: 50ms delay
+            this.startMoving = false; 
         });
     }
-    
-    update(delta: number) {
-        const moveSpeed = 80; // You can adjust this speed value as needed
-        if (this.startMoving) {
-            // Move the reel container upwards
-            // console.log("this.reelContainer.y");
-            
-            this.reelContainer.y += moveSpeed * delta / 1000; // Convert delta to seconds
-            if (this.reelContainer.y >= (this.isMobile ? window.innerHeight * 1.9: window.innerHeight * 1.8 )) {
-                 this.reelContainer.y = -4000;
-            }
-        }else{
-            setTimeout(() => {
-                if (this.bouncingTween) {
-                    this.bouncingTween.stop();
-                }
-            }, 500);
-            
-        }
-    }
 }
+

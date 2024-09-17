@@ -1,8 +1,6 @@
 import { io } from "socket.io-client";
 import { Globals, ResultData, initData } from "./scripts/Globals";
 import MainLoader from "./view/MainLoader";
-let counter = 0
-
 
 // const socketUrl = process.env.SOCKET_URL || ""
 export class SocketManager {
@@ -50,9 +48,7 @@ export class SocketManager {
       console.log("Connected to the server");
       this.socket.on("message", (message : any) => {
         const data = JSON.parse(message);
-        // console.log(`Message ID : ${data.id} |||||| Message Data : ${JSON.stringify(data.message)}`);
         console.log("Message ID", data);
-        
         if(data.id == "InitData" ) {
           if(initData.gameData.Bets.length != 0){
             initData.UIData.symbols = data.message.UIData.payLines.symbols
@@ -77,7 +73,6 @@ export class SocketManager {
         }
       });
     });
-
     this.socket.on("internalError", (errorMessage: string) => {
       console.log(errorMessage);
     });

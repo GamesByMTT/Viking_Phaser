@@ -114,7 +114,7 @@ export default class MainScene extends Scene {
                         Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
                     }, 2000);
                 }         
-                this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toString());
+                this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toFixed(2));
                 currentGameData.currentBalance = ResultData.playerData.Balance;
                 let betValue = (initData.gameData.Bets[currentGameData.currentBetIndex]) * 20
                 let jackpot = ResultData.gameData.jackpot

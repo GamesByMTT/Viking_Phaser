@@ -41,12 +41,12 @@ module.exports = {
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.ttf$/,
+        test: /\.otf$/,
         use: [
           {
-            loader: 'ttf-loader',
+            loader: 'otf-loader',
             options: {
-              name: './fonts/[hash].[ext]',
+              name: './src/fonts/[hash].[ext]',
             },
           }
         ]
@@ -86,6 +86,7 @@ new CopyPlugin({
   patterns: [
       { from: 'public/src/sprites', to: 'src/sprites' },
       { from: 'public/src/sounds', to: 'src/sounds' },
+      { from: 'public/src/fonts', to: 'src/fonts' },
       { from: 'public/favicon.png', to: 'favicon.png' },
       { from: 'public/style.css', to: 'style.css' }
   ],
