@@ -20,6 +20,8 @@ export class Slots extends Phaser.GameObjects.Container {
     private spacingX: number;
     private spacingY: number;
     private reelContainers: Phaser.GameObjects.Container[] = [];
+    private reelTweens: Phaser.Tweens.Tween[] = []; // Array for reel tweens
+    private repetitions: number[] = [0, 0, 0, 0, 0]; // Track repetitions for each reel
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void, SoundManager : SoundManager) {
         super(scene);
 
@@ -102,7 +104,6 @@ export class Slots extends Phaser.GameObjects.Container {
         const randomIndex = Phaser.Math.Between(0, this.symbolKeys.length - 1);        
         return this.symbolKeys[randomIndex];
     }
-
     moveReel() {    
         const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.slotSymbols[0][0].spacingY;
         setTimeout(() => {
@@ -122,68 +123,79 @@ export class Slots extends Phaser.GameObjects.Container {
                 }, 100 * i);
             }
         }
-        this.uiContainer.maxbetBtn.disableInteractive();
         this.moveSlots = true;
+        setTimeout(() => {
+            for (let i = 0; i < this.reelContainers.length; i++) {
+                this.startReelSpin(i);
+            }
+        }, 100);
+        this.uiContainer.maxbetBtn.disableInteractive();
     }
+
+    startReelSpin(reelIndex: number) {
+        if (this.reelTweens[reelIndex]) {
+            this.reelTweens[reelIndex].stop(); 
+        }
+        const reel = this.reelContainers[reelIndex];
+        const reelDelay = 200 * reelIndex;
+        // 1. Calculate spin distance for initial spin
+        const spinDistance = this.spacingY * 14; // Adjust this value for desired spin amount 
+        // reel.y -= 1;
+        this.reelTweens[reelIndex] = this.scene.tweens.add({
+            targets: reel,
+            y: `+=${spinDistance}`, // Spin relative to current position
+            duration: 600, 
+            repeat: 10, 
+            onComplete: () => {},
+            // delay: reelDelay
+        });
+    }
+
+
+    stopReel(reelIndex: number) {
+        const reel = this.reelContainers[reelIndex];
+        const reelDelay = 200 * (reelIndex + 1);
+        // Calculate target Y (ensure it's a multiple of symbolHeight)
+        const targetSymbolIndex = 0; // Example: Align the first symbol
+        const targetY = -targetSymbolIndex * this.symbolHeight; 
+        this.scene.tweens.add({
+            targets: reel,
+            y: targetY, // Animate relative to the current position
+            duration: 1000,
+            ease: 'Cubic.easeOut',
+            onComplete: () => {
+                if (this.reelTweens[reelIndex]) {
+                    this.reelTweens[reelIndex].stop(); 
+                }
+                if (reelIndex === this.reelContainers.length - 1) {
+                    this.playWinAnimations();
+                    this.moveSlots = false;
+                }
+            },
+            delay: reelDelay
+        });
+
+        for (let j = 0; j < this.slotSymbols[reelIndex].length; j++) {
+            this.slotSymbols[reelIndex][j].endTween();
+         }
+       
+    }
+
     update(time: number, delta: number) {
         if (this.slotSymbols && this.moveSlots) {
             for (let i = 0; i < this.reelContainers.length; i++) {
-                // Update the position of the entire reel container (move the reel upwards)
-                this.reelContainers[i].y += 2000 * delta / 1000; 
-
-                // Seamless looping: Reset position when the top goes offscreen
-                if (this.reelContainers[i].y >= this.maskHeight) {
-                    this.reelContainers[i].y = this.reelContainers[i].y - this.reelContainers[i].height; 
-                }
             }
         }
     }
 
     stopTween() {
-        // const maxDelay = 300 * (this.reelContainers.length - 1)
-
-        const reelStopDelay = 70; // Delay between each reel stop
-
-        const stopReel = (reelIndex: number) => {
-            const reel = this.reelContainers[reelIndex];
-            const reelDelay = reelStopDelay * (reelIndex * 0.8);
-            for (let j = 0; j < this.slotSymbols[reelIndex].length; j++) {
-                 this.scene.time.delayedCall(380, () => { // Example: 50ms delay
-                    this.moveSlots = false;
-                });
-                // endTween to replace the sprite according to 
-                this.slotSymbols[reelIndex][j].endTween();
-            }
-            // Calculate the target Y position 
-            const visibleAreaHeight = 3 * this.spacingY; 
-            const numReelHeights = Math.ceil(reel.y / visibleAreaHeight);
-            const targetY = -(numReelHeights * visibleAreaHeight); 
-            
-    
-            this.scene.tweens.add({
-                targets: reel,
-                delay: reelDelay, // Apply the delay here
-                y: {
-                    from:targetY - 380,
-                    to: targetY ,
-                    duration: 600, 
-                    ease: 'Sine.easeOut'
-                },
-                onComplete: () => {
-                    if (reelIndex === this.reelContainers.length - 1) {  
-                        this.playWinAnimations();
-                    } 
-                }
-            });   
-        };
         for (let i = 0; i < this.reelContainers.length; i++) { 
-            stopReel(i);   
+            this.stopReel(i);   
         }
     }
 
     // Function to play win animations
     playWinAnimations() {
-       
         this.resultCallBack(); // Call the result callback
         ResultData.gameData.symbolsToEmit.forEach((rowArray: any) => {
             rowArray.forEach((row: any) => {
@@ -202,7 +214,6 @@ export class Slots extends Phaser.GameObjects.Container {
     winMusic(key: string){
         this.SoundManager.playSound(key)
     }
-    
 }
 
 // @Sybols CLass
@@ -286,9 +297,8 @@ class Symbols {
                     }
         }
         // Stop moving and start tweening the sprite's position
-        this.scene.time.delayedCall(50, () => { // Example: 50ms delay
-            this.startMoving = false; 
-        });
+        this.startMoving = false; 
+     
     }
 }
 

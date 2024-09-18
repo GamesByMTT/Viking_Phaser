@@ -73,8 +73,6 @@ export default class MainScene extends Scene {
         // Initialize LineSymbols
         this.lineSymbols = new LineSymbols(this, 10, 12, this.lineGenerator)
         this.mainContainer.add(this.lineSymbols)
-        console.log(initData, "mainScene initData");
-        
     }
 
     update(time: number, delta: number) {
@@ -123,8 +121,6 @@ export default class MainScene extends Scene {
                 let winAmount = ResultData.gameData.WinAmout;   
                 this.uiContainer.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
                 const freeSpinCount = ResultData.gameData.freeSpins.count;
-                // const freeSpinCount = 5;
-                // Check if freeSpinCount is greater than 1
                 if (freeSpinCount >= 1) {
                     this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
                     this.uiContainer.freeSpininit(freeSpinCount)
@@ -141,6 +137,9 @@ export default class MainScene extends Scene {
                     // If count is 1 or less, ensure text is scaled normally
                     this.uiContainer.freeSpininit(freeSpinCount)
                 }
+                
+                // Check if freeSpinCount is greater than 1
+                
                 if (winAmount >= 10 * betValue && winAmount < 15 * betValue) {
                  // Big Win Popup
                  this.showWinPopup(winAmount, 'bigWinPopup')
@@ -154,68 +153,21 @@ export default class MainScene extends Scene {
                    //jackpot Condition
                    this.showWinPopup(winAmount, 'jackpotPopup')
                 }
-                this.slot.stopTween();
+                setTimeout(() => {
+                    this.slot.stopTween();
+                }, 100);
                 
             });
         }
     }
 
-    /**
-     * @method showWinPopup
-     * @description Displays a popup showing the win amount with an increment animation and different sprites
-     * @param winAmount The amount won to display in the popup
-     * @param spriteKey The key of the sprite to display in the popup
-     */
-    showWinPopup(winAmount: number, spriteKey: string) {
-        // Create the popup background
-        const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
-        .setOrigin(0, 0)
-        .setDepth(9) // Set depth to be below the popup but above game elements
-        .setInteractive() // Make it interactive to block all input events
-        inputOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            // Prevent default action on pointerdown to block interaction
-            pointer.event.stopPropagation();
-        });
-
-
-        // Create the sprite based on the key provided
-        const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY - 50, spriteKey).setDepth(11);
-
-        // Create the text object to display win amount
-        const winText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
-            font: '45px',
-            color: '#FFFFFF'
-        }).setDepth(11).setOrigin(0.5);
-
-        // Tween to animate the text increment from 0 to winAmount
-        this.tweens.addCounter({
-            from: 0,
-            to: winAmount,
-            duration: 1000, // Duration of the animation in milliseconds
-            onUpdate: (tween) => {
-                const value = Math.floor(tween.getValue());
-                winText.setText(value.toString());
-            },
-            onComplete: () => {
-                // Automatically close the popup after a few seconds
-                this.time.delayedCall(4000, () => {
-                    inputOverlay.destroy();
-                    winText.destroy();
-                    winSprite.destroy();
-                });
-            }
-        });
-    }
-
-    /**
+     /**
      * @method freeSpinPopup
      * @description Displays a popup showing the win amount with an increment animation and different sprites
      * @param freeSpinCount The amount won to display in the popup
      * @param spriteKey The key of the sprite to display in the popup
      */
-    freeSpinPopup(freeSpinCount: number, spriteKey: string) {
-        console.log(this.uiContainer.isAutoSpinning, "AutoSpinCheck");
-        
+     freeSpinPopup(freeSpinCount: number, spriteKey: string) {
         // Create the popup background
         const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
         .setOrigin(0, 0)
@@ -229,11 +181,10 @@ export default class MainScene extends Scene {
         const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY, spriteKey).setDepth(11);
         if(!this.uiContainer.isAutoSpinning){
           
-            
         }
         // Create the text object to display win amount
         const freeText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
-            font: '45px',
+            font: '50px',
             color: '#FFFFFF'
         }).setDepth(11).setOrigin(0.5);
         // Tween to animate the text increment from 0 to winAmount
@@ -256,7 +207,7 @@ export default class MainScene extends Scene {
                     currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
                     // this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
                     this.onSpinCallBack();
-        });
+            });
                 if(this.uiContainer.isAutoSpinning){
                 this.time.delayedCall(3000, () => {
                     inputOverlay.destroy();
@@ -264,11 +215,54 @@ export default class MainScene extends Scene {
                     winSprite.destroy();
                 });
                 }
+             }
+        });
+    }
+
+    /**
+     * @method showWinPopup
+     * @description Displays a popup showing the win amount with an increment animation and different sprites
+     * @param winAmount The amount won to display in the popup
+     * @param spriteKey The key of the sprite to display in the popup
+     */
+    showWinPopup(winAmount: number, spriteKey: string) {
+        // Create the popup background
+        const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
+        .setOrigin(0, 0)
+        .setDepth(15) // Set depth to be below the popup but above game elements
+        .setInteractive() // Make it interactive to block all input events
+        inputOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+            // Prevent default action on pointerdown to block interaction
+            pointer.event.stopPropagation();
+        });
+        // Create the sprite based on the key provided
+        const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY - 50, spriteKey).setDepth(15);
+        // Create the text object to display win amount
+        const winText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
+            font: '50px',
+            color: '#FFFFFF'
+        }).setDepth(15).setOrigin(0.5);
+
+        // Tween to animate the text increment from 0 to winAmount
+        this.tweens.addCounter({
+            from: 0,
+            to: winAmount,
+            duration: 1000, // Duration of the animation in milliseconds
+            onUpdate: (tween) => {
+                const value = Math.floor(tween.getValue());
+                winText.setText(value.toString());
+            },
+            onComplete: () => {
                 // Automatically close the popup after a few seconds
-                
+                this.time.delayedCall(4000, () => {
+                    inputOverlay.destroy();
+                    winText.destroy();
+                    winSprite.destroy();
+                });
             }
         });
     }
 
+   
    
 }

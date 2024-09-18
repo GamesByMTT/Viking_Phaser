@@ -482,6 +482,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         if(press){
             this.menuBtn.disableInteractive();
             this.settingBtn.disableInteractive()
+            // this.rulesBtn.disableInteractive();
             this.menuBtn.disableInteractive();
         }
     }
