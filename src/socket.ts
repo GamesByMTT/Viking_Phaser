@@ -45,7 +45,6 @@ export class SocketManager {
     });
 
     this.socket.on("connect", () => {
-      console.log("Connected to the server");
       this.socket.on("message", (message : any) => {
         const data = JSON.parse(message);
         console.log("Message ID", data);
@@ -59,7 +58,6 @@ export class SocketManager {
             initData.UIData.symbols = data.message.UIData.paylines.symbols
             initData.gameData.BonusData = data.message.BonusData;
             console.log(data, "initData on Socket File");
-            Globals.SceneHandler?.addScene("MainLoader", MainLoader, true)
           }
             // Globals.MainLoader?.onInitDataReceived();
             // this.onInitDataReceived()
