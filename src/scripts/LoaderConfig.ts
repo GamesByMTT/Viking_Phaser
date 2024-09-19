@@ -23,6 +23,7 @@ export const LoaderConfig = {
     infoBtnH :  "/src/sprites/ButtonInfoHover.png",
     exitButton: "src/sprites/ExitButton.png",
     exitButtonPressed: "src/sprites/ExitButtonHover.png",
+    disconnectClose: "src/sprites/disconnectClose.png",
     popupBgimg: "src/sprites/AboutPanel.png",
     logoutPop: "src/sprites/logoutPop.png",
     normalButton: "src/sprites/NormalButton.png",

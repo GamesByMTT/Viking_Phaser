@@ -3,6 +3,7 @@ import { Globals, ResultData, initData } from "./Globals";
 import { gameConfig } from './appconfig';
 import { UiContainer } from './UiContainer';
 import SoundManager from './SoundManager';
+import Disconnection from './Disconnection';
 export class Slots extends Phaser.GameObjects.Container {
     slotMask: Phaser.GameObjects.Graphics;
     SoundManager: SoundManager
@@ -21,7 +22,7 @@ export class Slots extends Phaser.GameObjects.Container {
     private spacingY: number;
     private reelContainers: Phaser.GameObjects.Container[] = [];
     private reelTweens: Phaser.Tweens.Tween[] = []; // Array for reel tweens
-    private repetitions: number[] = [0, 0, 0, 0, 0]; // Track repetitions for each reel
+    private connectionTimeout!: Phaser.Time.TimerEvent;
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void, SoundManager : SoundManager) {
         super(scene);
 
@@ -129,6 +130,13 @@ export class Slots extends Phaser.GameObjects.Container {
                 this.startReelSpin(i);
             }
         }, 100);
+
+        //Setting the Timer for response wait
+        this.connectionTimeout = this.scene.time.addEvent({
+            delay: 20000, // 20 seconds (adjust as needed)
+            callback: this.showDisconnectionScene,
+            callbackScope: this // Important for the 'this' context
+        });
         this.uiContainer.maxbetBtn.disableInteractive();
     }
 
@@ -139,18 +147,16 @@ export class Slots extends Phaser.GameObjects.Container {
         const reel = this.reelContainers[reelIndex];
         const reelDelay = 200 * reelIndex;
         // 1. Calculate spin distance for initial spin
-        const spinDistance = this.spacingY * 14; // Adjust this value for desired spin amount 
+        const spinDistance = this.spacingY * 10; // Adjust this value for desired spin amount 
         // reel.y -= 1;
         this.reelTweens[reelIndex] = this.scene.tweens.add({
             targets: reel,
             y: `+=${spinDistance}`, // Spin relative to current position
             duration: 600, 
-            repeat: 10, 
+            repeat: -1, 
             onComplete: () => {},
-            // delay: reelDelay
         });
     }
-
 
     stopReel(reelIndex: number) {
         const reel = this.reelContainers[reelIndex];
@@ -174,11 +180,16 @@ export class Slots extends Phaser.GameObjects.Container {
             },
             delay: reelDelay
         });
-
+        if (this.connectionTimeout) { 
+            this.connectionTimeout.remove(false);
+        }
         for (let j = 0; j < this.slotSymbols[reelIndex].length; j++) {
             this.slotSymbols[reelIndex][j].endTween();
          }
-       
+    }
+
+    showDisconnectionScene(){
+        Globals.SceneHandler?.addScene("Disconnection", Disconnection, true)
     }
 
     update(time: number, delta: number) {
@@ -187,7 +198,6 @@ export class Slots extends Phaser.GameObjects.Container {
             }
         }
     }
-
     stopTween() {
         for (let i = 0; i < this.reelContainers.length; i++) { 
             this.stopReel(i);   
@@ -298,7 +308,6 @@ class Symbols {
         }
         // Stop moving and start tweening the sprite's position
         this.startMoving = false; 
-     
     }
 }
 

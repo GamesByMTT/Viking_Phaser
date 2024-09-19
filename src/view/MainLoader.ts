@@ -158,7 +158,6 @@ export default class MainLoader extends Scene {
         );
     }
 
-
     private startLoadingAssets() {
         // Load all assets from LoaderConfig
         console.log("startLoadingAssets");

@@ -64,8 +64,6 @@ export default class MainScene extends Scene {
         this.lineGenerator = new LineGenerator(this, this.slot.slotSymbols[0][0].symbol.height, this.slot.slotSymbols[0][0].symbol.width).setScale(0.5, 0.4);
         this.mainContainer.add(this.lineGenerator);
 
-        
-
         // Initialize UI Popups
         this.uiPopups = new UiPopups(this, this.uiContainer, this.soundManager);
         this.mainContainer.add(this.uiPopups)
@@ -108,11 +106,13 @@ export default class MainScene extends Scene {
      */
     recievedMessage(msgType: string, msgParams: any) {
         if (msgType === 'ResultData') {
-            this.time.delayedCall(1000, () => {    
+            this.time.delayedCall(3000, () => {    
                 if (ResultData.gameData.isBonus) {
-                    setTimeout(() => {
-                        Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
-                    }, 2000);
+                    if(this.uiContainer.isAutoSpinning){
+                        this.uiContainer.autoBetBtn.emit('pointerdown'); 
+                        this.uiContainer.autoBetBtn.emit('pointerup');
+                    }
+                    Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
                 }         
                 this.uiContainer.currentWiningText.updateLabelText(ResultData.playerData.currentWining.toFixed(2));
                 currentGameData.currentBalance = ResultData.playerData.Balance;
@@ -137,9 +137,7 @@ export default class MainScene extends Scene {
                     // If count is 1 or less, ensure text is scaled normally
                     this.uiContainer.freeSpininit(freeSpinCount)
                 }
-                
                 // Check if freeSpinCount is greater than 1
-                
                 if (winAmount >= 10 * betValue && winAmount < 15 * betValue) {
                  // Big Win Popup
                  this.showWinPopup(winAmount, 'bigWinPopup')
@@ -153,11 +151,10 @@ export default class MainScene extends Scene {
                    //jackpot Condition
                    this.showWinPopup(winAmount, 'jackpotPopup')
                 }
-                setTimeout(() => {
-                    this.slot.stopTween();
-                }, 100);
-                
             });
+            setTimeout(() => {
+                this.slot.stopTween();
+            }, 1000);
         }
     }
 
