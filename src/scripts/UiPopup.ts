@@ -149,6 +149,9 @@ export class UiPopups extends Phaser.GameObjects.Container {
             this.scene.scale.height / 2
         ).setDepth(1);
         
+        let soundOn = this.SoundManager.getMasterVolume() > 0;
+        let musicOn = this.SoundManager.getSoundVolume("backgroundMusic") > 0;
+
         const popupBg = this.scene.add.image(0, 0, 'settingPopup').setDepth(9);
         const soundsImage = this.scene.add.image(-200, -120, 'soundImage').setDepth(10);
         const musicImage = this.scene.add.image(-200, 50, 'musicImage').setDepth(10);
@@ -157,24 +160,28 @@ export class UiPopups extends Phaser.GameObjects.Container {
             this.scene.textures.get('toggleBar'),
             this.scene.textures.get('toggleBar')
         ];
-        if(this.soundEnabled){
-            
-        }
-        const initialTexture = this.soundEnabled ? "onButton" : "offButton";
-        const onOff = this.scene.add.image(220, -120, initialTexture).setScale(0.5);
+       
+        const soundToggleButton = soundOn ? 'onButton' : 'offButton'
+        const onOff = this.scene.add.image(220, -120, soundToggleButton).setScale(0.5);
         onOff.setInteractive()
         onOff.on('pointerdown', () => {
-            this.toggleSound(onOff);
+            // this.toggleSound(onOff);
+            soundOn = !soundOn;
+            this.adjustSoundVolume(soundOn ? 1 : 0); // Assuming 1 is full volume
+            onOff.setTexture(soundOn ? 'onButton' : 'offButton');
         })
 
         const toggleMusicBar = this.scene.add.image(200, 50, "toggleBar")
         toggleMusicBar.setScale(0.5)
-        const musicinitialTexture = this.musicEnabled ? "onButton" : "offButton";
-        const offMusic = this.scene.add.image(220, 50, musicinitialTexture)
+        const musicToggleButton = musicOn ? 'onButton' : 'offButton'
+        const offMusic = this.scene.add.image(220, 50, musicToggleButton)
         offMusic.setScale(0.5)
         offMusic.setInteractive();
         offMusic.on('pointerdown', () => {
-            this.toggleMusic(offMusic)
+            // this.toggleMusic(offMusic)
+            musicOn = !musicOn;
+            this.adjustMusicVolume(musicOn ? 1 : 0); // Assuming 1 is full volume
+            offMusic.setTexture(musicOn ? 'onButton' : 'offButton');
         })
 
         this.toggleBar = new InteractiveBtn(this.scene, toggleBarSprite, () => {
@@ -198,6 +205,14 @@ export class UiPopups extends Phaser.GameObjects.Container {
         popupBg.setAlpha(1); // Set background transparency
 
         infopopupContainer.add([popupBg, this.settingClose, soundsImage, musicImage, this.toggleBar, onOff, toggleMusicBar, offMusic]);
+    }
+    adjustSoundVolume(level: number) {
+        this.SoundManager.setMasterVolume(level);
+    }
+
+    // Function to adjust music volume
+    adjustMusicVolume(level: number) {
+        this.SoundManager.setVolume("backgroundMusic", level);
     }
 
     toggleSound(onOff: any) {
@@ -249,11 +264,12 @@ export class UiPopups extends Phaser.GameObjects.Container {
                 const headingImage = this.scene.add.image( gameConfig.scale.width / 2, gameConfig.scale.height / 2 - 400, 'headingImage' ); popupContainer.add(headingImage); 
                 // 4. Add a close button to the popup 
                 const closeButton = this.scene.add.sprite( gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2 - 400, 'exitButton' ).setInteractive(); 
-                closeButton.setScale(0.5); closeButton.on('pointerdown', () => { popupContainer.destroy(); 
+                    closeButton.setScale(0.5); 
+                closeButton.on('pointerdown', () => { popupContainer.destroy(); 
                     // Destroy the popup when the close button is clicked 
                     scrollContainer.destroy(); 
                     // Destroy the scroll container when the popup is closed
-                    }); 
+                }); 
                     popupContainer.add(closeButton); 
                     // 5. Create a mask to define the visible area for scrolling 
                     const maskShape = this.scene.make.graphics().fillRect( 
