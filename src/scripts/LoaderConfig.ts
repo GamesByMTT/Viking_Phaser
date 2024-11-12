@@ -483,7 +483,9 @@ export const staticData = {
     Background:  "src/sprites/Background.jpg",
 };
 
-export const fontData = ["Montserrat"];
+export const fontData = {
+    Digra : "src/fonts/DirgaExtraBold-BWPqn.otf"
+}
 
 
 

@@ -89,6 +89,8 @@ export const currentGameData = {
   currentLines: 0,
   currentBalance: 0,
   isMoving: false,
+  soundMode: true,
+musicMode: true,
 };
 
 export const ResultData = {
@@ -139,6 +141,7 @@ export const TextStyle = {
   fillGradientStops: [0.4],
   fontSize: 32,
   fontWeight: "bolder",
+  fontFamily: "Digra",
   lineJoin: "round",
   miterLimit: 0,
   stroke: "#4f3130",

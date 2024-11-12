@@ -28,6 +28,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
     freeSpinContainer!: Phaser.GameObjects.Container
     spinButtonSound!: Phaser.Sound.BaseSound
     normalButtonSound!: Phaser.Sound.BaseSound
+    exitBtn!: Phaser.GameObjects.Sprite
 
     constructor(scene: Scene, spinCallBack: () => void, soundManager: SoundManager) {
         super(scene);
@@ -97,7 +98,6 @@ export class UiContainer extends Phaser.GameObjects.Container {
         container.add(this.mBtn);
         this.CurrentLineText = new TextLabel(this.scene, 0, 10, initData.gameData.Bets[currentGameData.currentBetIndex], 27, "#ffffff");
         //Line Count
-        
         container.add(this.CurrentLineText).setDepth(1)
     }
 
@@ -150,7 +150,10 @@ export class UiContainer extends Phaser.GameObjects.Container {
         
         this.spinBtn = new Phaser.GameObjects.Sprite(this.scene, 0, 0, "spinBtn");
         this.spinBtn = this.createButton('spinBtn', gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1, () => {
-            // this.spinButtonSound = this.scene.sound.add("spinButton", {loop: false, volume: 0.8})
+            if(ResultData.playerData.Balance < initData.gameData.Bets[currentGameData.currentBetIndex]){
+                this.lowBalancePopup();
+                return
+            }
             // this.spinButtonSound.play();
                 this.bnuttonMusic("spinButton");
             // checking if autoSpining is working or not if it is auto Spining then stop it
@@ -285,16 +288,40 @@ export class UiContainer extends Phaser.GameObjects.Container {
     }
 
     
-
-    /**
-     * @method startFireAnimation used to show and play fireAnimation on both vase1 and vase2
-     */
-    // startFireAnimation() {
-    //     this.fireSprite1.setVisible(true);
-    //     this.fireSprite1.play('fireAnimation');
-    //     this.fireSprite2.setVisible(true);
-    //     this.fireSprite2.play('fireAnimation');
-    // }
+    lowBalancePopup(){
+        // Create a semi-transparent background for the popup
+        const blurGraphic = this.scene.add.graphics().setDepth(1); // Set depth lower than popup elements
+        blurGraphic.fillStyle(0x000000, 0.5); // Black with 50% opacity
+        blurGraphic.fillRect(0, 0, this.scene.scale.width, this.scene.scale.height); // Cover entire screen
+    
+        // Create a container for the popup
+        const popupContainer = this.scene.add.container(
+            this.scene.scale.width / 2,
+            this.scene.scale.height / 2
+        ).setDepth(1); // Set depth higher than blurGraphic
+    
+        // Popup background image
+        const popupBg = this.scene.add.image(0, 0, 'logoutPop').setDepth(10);
+        popupBg.setOrigin(0.5);
+        popupBg.setDisplaySize(900, 671); // Set the size for your popup background
+        popupBg.setAlpha(1); // Set background transparency
+   
+        this.exitBtn = this.createButton('exitButton', 420, -310, () => { 
+            popupContainer.destroy();
+            blurGraphic.destroy(); // Destroy blurGraphic when popup is closed
+            this.bnuttonMusic("buttonpressed");
+        })
+        this.exitBtn.setScale(0.6)
+        // Add text to the popup
+        const popupText = this.scene.add.text(0, 0, "Your account balance is running low. Please add funds to keep continue.", {color:"#ffffff", fontSize: "40px", fontFamily: 'Digra', align:"center",wordWrap: { width: 600, useAdvancedWrap: true }}).setOrigin(0.5);
+      
+      
+        // Add all elements to popupContainer
+        popupContainer.add([popupBg, popupText,this.exitBtn]);
+        // Add popupContainer to the scene
+        this.scene.add.existing(popupContainer);  
+    }
+    
     /**
      * @method stopFireAnimation used to stop both animation
      */

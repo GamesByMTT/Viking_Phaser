@@ -12,7 +12,6 @@ export default class SoundManager {
 
     constructor(scene: Phaser.Scene) {
         this.scene = scene;
-        this.setupFocusBlurEvents();
     }
 
     public addSound(key: string, url: string) {
@@ -103,16 +102,6 @@ private applyVolumeToSound(sound: Howl & { userVolume?: number }) {
 public getSound(key: string): Phaser.Sound.BaseSound | undefined {
     return this.sounds[key];
 }
-private setupFocusBlurEvents() {
-    window.addEventListener('blur', () => {
-            // console.log("onBlur");
-                this.pauseSound('backgroundMusic');
-        });
-
-        window.addEventListener('focus', () => {
-            this.resumeBgMusic('backgroundMusic');
-        });
-    }
 
     public getMasterVolume(): number {
         return this.masterVolume;

@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { Globals, initData, TextStyle } from "./Globals";
+import { currentGameData, Globals, initData, TextStyle } from "./Globals";
 import { gameConfig } from "./appconfig";
 import { TextLabel } from "./TextLabel";
 import { UiContainer } from "./UiContainer";
@@ -161,27 +161,35 @@ export class UiPopups extends Phaser.GameObjects.Container {
             this.scene.textures.get('toggleBar')
         ];
        
-        const soundToggleButton = soundOn ? 'onButton' : 'offButton'
-        const onOff = this.scene.add.image(220, -120, soundToggleButton).setScale(0.5);
+        const soundToggleButton =  currentGameData.soundMode ? 'onButton' : 'offButton'
+        let onOff : any
+        if(!currentGameData.soundMode){
+            onOff = this.scene.add.image(180, -120, soundToggleButton).setScale(0.5);
+        }else{
+            onOff = this.scene.add.image(220, -120, soundToggleButton).setScale(0.5);
+        }
         onOff.setInteractive()
         onOff.on('pointerdown', () => {
             // this.toggleSound(onOff);
             soundOn = !soundOn;
-            this.adjustSoundVolume(soundOn ? 1 : 0); // Assuming 1 is full volume
+            this.adjustSoundVolume(onOff); // Assuming 1 is full volume
             onOff.setTexture(soundOn ? 'onButton' : 'offButton');
         })
 
         const toggleMusicBar = this.scene.add.image(200, 50, "toggleBar")
         toggleMusicBar.setScale(0.5)
-        const musicToggleButton = musicOn ? 'onButton' : 'offButton'
-        const offMusic = this.scene.add.image(220, 50, musicToggleButton)
+        const musicToggleButton = currentGameData.musicMode ? 'onButton' : 'offButton'
+        let offMusic: any
+
+        if(!currentGameData.musicMode){
+            offMusic = this.scene.add.image(180, 50, musicToggleButton).setScale(0.5);
+        }else{
+            offMusic = this.scene.add.image(220, 50, musicToggleButton).setScale(0.5);
+        }
         offMusic.setScale(0.5)
         offMusic.setInteractive();
         offMusic.on('pointerdown', () => {
-            // this.toggleMusic(offMusic)
-            musicOn = !musicOn;
-            this.adjustMusicVolume(musicOn ? 1 : 0); // Assuming 1 is full volume
-            offMusic.setTexture(musicOn ? 'onButton' : 'offButton');
+            this.adjustMusicVolume(offMusic); // Assuming 1 is full volume
         })
 
         this.toggleBar = new InteractiveBtn(this.scene, toggleBarSprite, () => {
@@ -206,13 +214,32 @@ export class UiPopups extends Phaser.GameObjects.Container {
 
         infopopupContainer.add([popupBg, this.settingClose, soundsImage, musicImage, this.toggleBar, onOff, toggleMusicBar, offMusic]);
     }
-    adjustSoundVolume(level: number) {
-        this.SoundManager.setMasterVolume(level);
+    adjustSoundVolume(onOff: any) {
+        currentGameData.soundMode = !currentGameData.soundMode
+        this.soundEnabled = !this.soundEnabled;
+        if (this.soundEnabled) {
+            onOff.setTexture('onButton');
+            onOff.setPosition(220, -120); // Move position for 'On' state
+           
+        } else {
+            onOff.setTexture('offButton');
+            onOff.setPosition(180, -120); // Move position for 'Off' state
+        }
+        this.SoundManager.setSoundEnabled(this.soundEnabled)
     }
 
     // Function to adjust music volume
-    adjustMusicVolume(level: number) {
-        this.SoundManager.setVolume("backgroundMusic", level);
+    adjustMusicVolume(offMusic: any) {
+        currentGameData.musicMode = !currentGameData.musicMode
+        this.musicEnabled = !this.musicEnabled;
+        if (this.musicEnabled) {
+            offMusic.setTexture('onButton');
+            offMusic.setPosition(220, 50); // Move position for 'On' state
+        } else {
+            offMusic.setTexture('offButton');
+            offMusic.setPosition(180, 50); // Move position for 'Off' state;
+        }
+        this.SoundManager.setMusicEnabled(this.musicEnabled)
     }
 
     toggleSound(onOff: any) {
@@ -325,7 +352,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
                                         iconPosition.x, // X position
                                         iconPosition.y + multiplierIndex * 40, // Y position (spacing between lines)
                                         text,
-                                        { fontSize: '30px', color: '#fff', align: "left" } // Customize text style
+                                        { fontSize: '30px', color: '#fff', align: "left", fontFamily: 'Digra' } // Customize text style
                                     );
                                     // Set line spacing and other styles
                                     textObject.setLineSpacing(10);  // Adjust the line height as needed
@@ -367,7 +394,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
                                     position.x, // X position
                                     position.y +  40, // Y position (spacing between lines)
                                     descriptionText,
-                                 { fontSize: '30px', color: '#fff', align: "left",  wordWrap: { width: 1200, useAdvancedWrap: true }} // Customize text style
+                                 { fontSize: '30px', color: '#fff', align: "left", fontFamily: 'Digra',  wordWrap: { width: 1200, useAdvancedWrap: true }} // Customize text style
                             );
                             descriptionObject.setLineSpacing(10);  // Adjust the line height as needed
                             descriptionObject.setOrigin(0, 0.5); // Center the text if needed
@@ -429,6 +456,51 @@ export class UiPopups extends Phaser.GameObjects.Container {
                         // Update scroll container's Y position based on scroll percentage
                         scrollContainer.y = Phaser.Math.Interpolation.Linear([contentMaxY, contentMinY], scrollPercent);
                     });
+
+                    let startY = 0;
+                    let currentY = 0;
+                    let isDragging = false;
+                
+                    // Make the scroll container interactive
+                    scrollContainer.setInteractive(new Phaser.Geom.Rectangle(
+                        0,
+                        0,
+                        gameConfig.scale.width - 100, // Width of the scrollable area
+                        2900 // Height of the scrollable area
+                    ), Phaser.Geom.Rectangle.Contains);
+                
+                    // Touch start
+                    scrollContainer.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
+                        console.log("touc 2");
+                        isDragging = true;
+                        startY = pointer.y;
+                        currentY = scrollContainer.y;
+                    });
+                
+                    // Touch move
+                    this.scene.input.on('pointermove', (pointer: Phaser.Input.Pointer) => {
+                        if (!isDragging) return;
+                        const deltaY = pointer.y - startY;
+                        const newY = currentY + deltaY;
+                        // console.log(deltaY, newY, startY, pointer.y);
+                        // Calculate bounds
+                        const maxY = 300; // Top bound
+                        const minY = -(contentHeight - 600); // Bottom bound
+                
+                        // Clamp the scroll position
+                        scrollContainer.y = Phaser.Math.Clamp(newY, minY, maxY);
+                
+                        // Update roller position
+                        const scrollPercent = (maxY - scrollContainer.y) / (maxY - minY);
+                        const rollerMinY = scrollbarBg.getTopCenter().y + roller.height / 2;
+                        const rollerMaxY = scrollbarBg.getBottomCenter().y - roller.height / 2;
+                        roller.y = Phaser.Math.Linear(rollerMinY, rollerMaxY, scrollPercent);
+                    });
+                
+                    // Touch end
+                    this.scene.input.on('pointerup', () => {
+                        isDragging = false;
+                    });
         }
 
     buttonMusic(key: string){
@@ -459,7 +531,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         popupBg.setAlpha(1); // Set background transparency
         this.exitBtn.disableInteractive();
         // Add text to the popup
-        const popupText = new TextLabel(this.scene, 0, -45, "Do you really want \n to exit?", 50, "#6b768b");
+        const popupText = new TextLabel(this.scene, 0, -75, "Do you really want \n to exit?", 50, "#6b768b");
         
         // Yes and No buttons
         const logoutButtonSprite = [
