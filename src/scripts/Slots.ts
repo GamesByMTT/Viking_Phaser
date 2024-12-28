@@ -62,7 +62,7 @@ export class Slots extends Phaser.GameObjects.Container {
             const reelContainer = new Phaser.GameObjects.Container(scene);
             this.reelContainers.push(reelContainer); // Store the container for future use
             this.slotSymbols[i] = [];
-            for (let j = 0; j < 28; j++) { // 3 rows
+            for (let j = 0; j < 14; j++) { // 3 rows
                 let symbolKey = this.getRandomSymbolKey(); // Get a random symbol key
                 let slot = new Symbols(scene, symbolKey, { x: i, y: j }, reelContainer);
                 slot.symbol.setMask(new Phaser.Display.Masks.GeometryMask(scene, this.slotMask));
@@ -106,7 +106,7 @@ export class Slots extends Phaser.GameObjects.Container {
         return this.symbolKeys[randomIndex];
     }
     moveReel() {    
-        const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.slotSymbols[0][0].spacingY;
+        const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.spacingY;
         setTimeout(() => {
             for (let i = 0; i < this.reelContainers.length; i++) {
                 this.reelContainers[i].setPosition(
@@ -145,30 +145,35 @@ export class Slots extends Phaser.GameObjects.Container {
             this.reelTweens[reelIndex].stop(); 
         }
         const reel = this.reelContainers[reelIndex];
-        const reelDelay = 200 * reelIndex;
         // 1. Calculate spin distance for initial spin
         const spinDistance = this.spacingY * 10; // Adjust this value for desired spin amount 
         // reel.y -= 1;
         this.reelTweens[reelIndex] = this.scene.tweens.add({
             targets: reel,
             y: `+=${spinDistance}`, // Spin relative to current position
-            duration: 600, 
+            duration: 1000, 
             repeat: -1, 
             onComplete: () => {},
         });
     }
 
+    stopTween() {
+        for (let i = 0; i < this.reelContainers.length; i++) { 
+            this.stopReel(i);   
+        }
+    }
+
     stopReel(reelIndex: number) {
         const reel = this.reelContainers[reelIndex];
-        const reelDelay = 200 * (reelIndex + 1);
+        const reelDelay = 200 * reelIndex;
         // Calculate target Y (ensure it's a multiple of symbolHeight)
-        const targetSymbolIndex = 0; // Example: Align the first symbol
-        const targetY = -targetSymbolIndex * this.symbolHeight; 
+        const targetSymbolIndex = 0; // Example: Align the first symbol 
         this.scene.tweens.add({
             targets: reel,
-            y: targetY, // Animate relative to the current position
-            duration: 1000,
-            ease: 'Cubic.easeOut',
+            delay: reelDelay,
+            y: targetSymbolIndex, // Animate relative to the current position
+            duration: 1200,
+            ease: 'Linear',
             onComplete: () => {
                 if (this.reelTweens[reelIndex]) {
                     this.reelTweens[reelIndex].stop(); 
@@ -178,7 +183,7 @@ export class Slots extends Phaser.GameObjects.Container {
                     this.moveSlots = false;
                 }
             },
-            delay: reelDelay
+            
         });
         if (this.connectionTimeout) { 
             this.connectionTimeout.remove(false);
@@ -191,18 +196,7 @@ export class Slots extends Phaser.GameObjects.Container {
     showDisconnectionScene(){
         Globals.SceneHandler?.addScene("Disconnection", Disconnection, true)
     }
-
-    update(time: number, delta: number) {
-        if (this.slotSymbols && this.moveSlots) {
-            for (let i = 0; i < this.reelContainers.length; i++) {
-            }
-        }
-    }
-    stopTween() {
-        for (let i = 0; i < this.reelContainers.length; i++) { 
-            this.stopReel(i);   
-        }
-    }
+   
 
     // Function to play win animations
     playWinAnimations() {
@@ -236,12 +230,9 @@ class Symbols {
     totalSymbol : number = 14;
     visibleSymbol: number = 3;
     startIndex: number = 1;
-    spacingY : number = 204;
     initialYOffset : number = 0
     scene: Phaser.Scene;
-    private isMobile: boolean;
     reelContainer: Phaser.GameObjects.Container;
-    private bouncingTween: Phaser.Tweens.Tween | null = null;
 
     constructor(scene: Phaser.Scene, symbolKey: string, index: { x: number; y: number }, reelContainer: Phaser.GameObjects.Container) {
         this.scene = scene;
@@ -250,7 +241,6 @@ class Symbols {
         const updatedSymbolKey = this.updateKeyToZero(symbolKey)
         this.symbol = new Phaser.GameObjects.Sprite(scene, 0, 0, updatedSymbolKey);
         this.symbol.setOrigin(0.5, 0.5);
-        this.isMobile = scene.sys.game.device.os.android || scene.sys.game.device.os.iOS;
         // Load textures and create animation
         const textures: string[] = [];
         for (let i = 0; i < 28; i++) {
@@ -286,7 +276,7 @@ class Symbols {
             let textureKeys: string[] = [];
             // Retrieve the elementId based on index
             const elementId = ResultData.gameData.ResultReel[this.index.y][this.index.x];
-                for (let i = 0; i < 15; i++) {
+                for (let i = 0; i < 35; i++) {
                     const textureKey = `slots${elementId}_${i}`;
                     // Check if the texture exists in cache
                     if (this.scene.textures.exists(textureKey)) {

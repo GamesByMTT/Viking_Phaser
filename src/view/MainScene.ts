@@ -74,9 +74,9 @@ export default class MainScene extends Scene {
         this.setupFocusBlurEvents();
     }
 
-    update(time: number, delta: number) {
-        this.slot.update(time, delta);
-    }
+    // update(time: number, delta: number) {
+    //     this.slot.update(time, delta);
+    // }
 
     /**
      * @method onResultCallBack Change Sprite and Lines
