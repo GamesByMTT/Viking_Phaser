@@ -31,7 +31,7 @@ export class UiPopups extends Phaser.GameObjects.Container {
         // this.settingBtnInit();
         // this.infoBtnInit();
         // this.menuBtnInit();
-        this.exitButton();
+        // this.exitButton();
         this.UiContainer = uiContainer
         this.SoundManager = soundManager
         scene.add.existing(this);

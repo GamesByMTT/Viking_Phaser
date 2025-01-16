@@ -90,7 +90,10 @@ export const currentGameData = {
   currentBalance: 0,
   isMoving: false,
   soundMode: true,
-musicMode: true,
+  musicMode: true,
+  turboMode: false,
+    isAutoSpin: false,
+    bonusOpen: false,
 };
 
 export const ResultData = {

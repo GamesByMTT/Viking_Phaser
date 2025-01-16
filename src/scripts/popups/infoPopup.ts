@@ -19,8 +19,6 @@ export class InfoPopup extends Phaser.GameObjects.Container {
         const closeButton = this.scene.add.sprite(gameConfig.scale.width / 2 + 800, gameConfig.scale.height / 2 - 400, 'exitButton').setInteractive();
         closeButton.setScale(0.5);
         closeButton.on('pointerdown', () => {
-            //  popupContainer.destroy(); 
-            // Destroy the popup when the close button is clicked 
             scrollContainer.destroy();
             this.scene.events.emit("closePopup");
             // Destroy the scroll container when the popup is closed
@@ -31,7 +29,7 @@ export class InfoPopup extends Phaser.GameObjects.Container {
             0, // Adjust X position to center 
             gameConfig.scale.height / 2 - 300, // Adjust Y position 
             gameConfig.scale.width - 100, // Full width minus some padding 
-            800 // Desired height of the scrollable area 
+            1000 // Desired height of the scrollable area 
         );
         const mask = maskShape.createGeometryMask();
         // 6. Add the scrollable container to the popup container 
@@ -44,21 +42,31 @@ export class InfoPopup extends Phaser.GameObjects.Container {
 
         // 7. Add the content that will be scrolled 
         const contentHeight = 3000; // Example content height, adjust as needed 
-        const content = this.scene.add.image(gameConfig.scale.width / 2, 100, 'minorSymbolsHeading').setOrigin(0.5).setDepth(2);
+        const firstLine = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.1, "Winning are calculated based on bet per line", {fontFamily: "Digra", fontSize: '40px', color: '#97b0e1', stroke: "#000000", strokeThickness:7,}).setOrigin(0.5);
+        const betPerLine = this.scene.add.text(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.14, "Bet per line = Total Bet / Number of lines", {fontFamily: "Digra", fontSize: '35px', color: '#ffffff', stroke: "#000000", strokeThickness:7,}).setOrigin(0.5)
+        const MajorSymBolHeading = this.scene.add.image(gameConfig.scale.width / 2, 250, 'majorSymbolHeading').setOrigin(0.5).setDepth(2);
+        const majorSymbol1 = this.scene.add.image(650, 450, "slots5_0").setDepth(2).setScale(0.5)
+        const majorSymbol2 = this.scene.add.image(1050, 450, "slots6_0").setDepth(2).setScale(0.5)
+        const majorSymbol3 = this.scene.add.image(650, 700, "slots7_0").setDepth(2).setScale(0.5)
+        const majorSymbol4 = this.scene.add.image(1050, 700, "slots8_0").setDepth(2).setScale(0.5)
+        const majorSymbol1Text = this.scene.add.text(750, 400, '5X - 200X \n4X - 80X \n3X - 40X', TextStyle)
+        const majorSymbol2Text = this.scene.add.text(1150, 400, '5X - 200X \n4X - 80X \n3X - 40X', TextStyle)
+        const majorSymbol3Text = this.scene.add.text(750, 650, '5X - 200X \n4X - 80X \n3X - 10X', TextStyle)
+        const majorSymbol4Text = this.scene.add.text(1150, 650, '5X - 200X \n4X - 80X \n3X - 40X', TextStyle)
 
-        const minSymbol1 = this.scene.add.image(350, 350, "slots0_0").setDepth(2).setScale(0.5)
-        const minSymbol2 = this.scene.add.image(850, 350, "slots1_0").setDepth(2).setScale(0.5)
-        const minSymbol3 = this.scene.add.image(1350, 350, "slots2_0").setDepth(2).setScale(0.5)
-        const minSymbol4 = this.scene.add.image(650, 550, "slots3_0").setDepth(2).setScale(0.5)
-        const minSymbol5 = this.scene.add.image(1050, 550, "slots4_0").setDepth(2).setScale(0.5)
-
+        const content = this.scene.add.image(gameConfig.scale.width / 2, 900, 'minorSymbolsHeading').setOrigin(0.5).setDepth(2);
+        const minSymbol1 = this.scene.add.image(350, 1100, "slots0_0").setDepth(2).setScale(0.5)
+        const minSymbol2 = this.scene.add.image(850, 1100, "slots1_0").setDepth(2).setScale(0.5)
+        const minSymbol3 = this.scene.add.image(1350, 1100, "slots2_0").setDepth(2).setScale(0.5)
+        const minSymbol4 = this.scene.add.image(650, 1300, "slots3_0").setDepth(2).setScale(0.5)
+        const minSymbol5 = this.scene.add.image(1050, 1300, "slots4_0").setDepth(2).setScale(0.5)
 
         const infoIcons = [
-            { x: 500, y: 300 }, // Position for infoIcon2
-            { x: 1000, y: 300 }, // Position for infoIcon3
-            { x: 1500, y: 300 }, //
-            { x: 800, y: 500 }, //
-            { x: 1200, y: 500 }, //
+            { x: 500, y: 1050 }, // Position for infoIcon2
+            { x: 1000, y: 1050 }, // Position for infoIcon3
+            { x: 1500, y: 1050 }, //
+            { x: 800, y: 1250 }, //
+            { x: 1200, y: 1250 }, //
         ]
         const minorIcon = initData.UIData.symbols
         minorIcon.forEach((symbol, symbolIndex) => {
@@ -74,7 +82,7 @@ export class InfoPopup extends Phaser.GameObjects.Container {
                         // Determine the text (e.g., '5x', '4x', '2x')
                         const prefix = [5, 4, 2][multiplierIndex] || 1; // Customize this if needed
                         // Create the text content
-                        const text = `${prefix}x ${multiplierValue}`;
+                        const text = `${prefix}x ${multiplierValue}x`;
                         // Create the text object
                         const textObject = this.scene.add.text(
                             iconPosition.x, // X position
@@ -84,20 +92,14 @@ export class InfoPopup extends Phaser.GameObjects.Container {
                         );
                         // Set line spacing and other styles
                         textObject.setLineSpacing(10);  // Adjust the line height as needed
-                        textObject.setOrigin(0.5, 0.5); // Center the text if needed
+                        textObject.setOrigin(0.5); // Center the text if needed
                         scrollContainer.add(textObject);
                     }
                 }
             });
         });
-        const majorSymbol1 = this.scene.add.image(650, 1100, "slots5_0").setDepth(2).setScale(0.5)
-        const majorSymbol2 = this.scene.add.image(1050, 1100, "slots6_0").setDepth(2).setScale(0.5)
-        const majorSymbol3 = this.scene.add.image(650, 1300, "slots7_0").setDepth(2).setScale(0.5)
-        const majorSymbol4 = this.scene.add.image(1050, 1300, "slots8_0").setDepth(2).setScale(0.5)
-        const majorSymbol1Text = this.scene.add.text(750, 1050, '5X - 200 \n4X - 80 \n3X - 40', TextStyle)
-        const majorSymbol2Text = this.scene.add.text(1150, 1050, '5X - 200 \n4X - 80 \n3X - 40', TextStyle)
-        const majorSymbol3Text = this.scene.add.text(750, 1250, '5X - 200 \n4X - 80 \n3X - 10', TextStyle)
-        const majorSymbol4Text = this.scene.add.text(1150, 1250, '5X - 200 \n4X - 80 \n3X - 40', TextStyle)
+        
+        
         const specialSymBol1 = this.scene.add.image(200, 1750, "slots9_0").setDepth(2).setOrigin(0.5).setScale(0.5)
         const specialSymBol2 = this.scene.add.image(200, 1950, "slots10_0").setDepth(2).setOrigin(0.5).setScale(0.5)
         const specialSymBol3 = this.scene.add.image(200, 2150, "slots11_0").setDepth(2).setOrigin(0.5).setScale(0.5)
@@ -130,21 +132,21 @@ export class InfoPopup extends Phaser.GameObjects.Container {
             } else {
             }
         }
-        const MajorSymBolHeading = this.scene.add.image(gameConfig.scale.width / 2, 800, 'majorSymbolHeading').setOrigin(0.5).setDepth(2);
+       
         const specialSymBolHeading = this.scene.add.image(gameConfig.scale.width / 2, 1550, "specialSymBolHeading").setDepth(2).setOrigin(0.5)
         const payLines = this.scene.add.image(gameConfig.scale.width / 2, 3000, 'payLines').setOrigin(0.5).setDepth(2);
-        scrollContainer.add([content, minSymbol1, minSymbol2,
+        scrollContainer.add([content, firstLine, betPerLine, minSymbol1, minSymbol2,
             minSymbol3, minSymbol4, minSymbol5,
             MajorSymBolHeading, majorSymbol1, majorSymbol1Text, majorSymbol2, majorSymbol2Text,
             majorSymbol3, majorSymbol3Text, majorSymbol4, majorSymbol4Text, specialSymBolHeading, specialSymBol1, specialSymBol2, specialSymBol3, specialSymBol4, specialSymBol5,
             payLines
         ]);
         // 8. Scrollbar background 
-        const scrollbarBg = this.scene.add.sprite(gameConfig.scale.width - 40, // Positioned on the right side 
-            gameConfig.scale.height / 2, 'scrollBg').setOrigin(0.5).setDisplaySize(55, 740); // Adjust height as needed 
+        const scrollbarBg = this.scene.add.sprite(gameConfig.scale.width * 0.9, // Positioned on the right side 
+            gameConfig.scale.height / 2, 'scrollBg').setOrigin(0.5).setDisplaySize(55, 770); // Adjust height as needed 
         this.add(scrollbarBg);
         // 9. Roller image for the scrollbar 
-        const roller = this.scene.add.image(gameConfig.scale.width - 40, gameConfig.scale.height / 2 - 200, 'scroller').setOrigin(0.5).setInteractive({ draggable: true }).setScale(1, 0.8);
+        const roller = this.scene.add.image(gameConfig.scale.width * 0.9, gameConfig.scale.height / 2 - 200, 'scroller').setOrigin(0.5).setInteractive({ draggable: true }).setScale(1, 0.8);
         this.add(roller);
         // 10. Add drag event listener to the roller 
         this.scene.input.setDraggable(roller);
@@ -161,7 +163,7 @@ export class InfoPopup extends Phaser.GameObjects.Container {
             const scrollPercent = (dragY - minY) / (maxY - minY);
 
             // Map the scroll percentage to the content's Y position range
-            const contentMaxY = 140; // The top position of content (relative to mask)
+            const contentMaxY = 130; // The top position of content (relative to mask)
             const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
 
             // Update scroll container's Y position based on scroll percentage
@@ -179,7 +181,7 @@ export class InfoPopup extends Phaser.GameObjects.Container {
             // Calculate the scroll percentage (0 to 1)
             const scrollPercent = (newY - minY) / (maxY - minY);
             // Map the scroll percentage to the content's Y position range
-            const contentMaxY = 300; // The top position of content (relative to mask)
+            const contentMaxY = 290; // The top position of content (relative to mask)
             const contentMinY = -(contentHeight - 600); // The bottom position of content relative to mask
             // Update scroll container's Y position based on scroll percentage
             scrollContainer.y = Phaser.Math.Interpolation.Linear([contentMaxY, contentMinY], scrollPercent);

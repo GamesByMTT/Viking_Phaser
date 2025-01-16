@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Globals, ResultData, initData } from "./Globals";
+import { Globals, ResultData, currentGameData, initData } from "./Globals";
 import { gameConfig } from './appconfig';
 import { UiContainer } from './UiContainer';
 import SoundManager from './SoundManager';
@@ -23,6 +23,8 @@ export class Slots extends Phaser.GameObjects.Container {
     private reelContainers: Phaser.GameObjects.Container[] = [];
     private reelTweens: Phaser.Tweens.Tween[] = []; // Array for reel tweens
     private connectionTimeout!: Phaser.Time.TimerEvent;
+    freeSpinTimer: Phaser.Time.TimerEvent | null = null;
+    pendingFreeSpin: boolean = false;
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void, SoundManager : SoundManager) {
         super(scene);
 
@@ -62,7 +64,7 @@ export class Slots extends Phaser.GameObjects.Container {
             const reelContainer = new Phaser.GameObjects.Container(scene);
             this.reelContainers.push(reelContainer); // Store the container for future use
             this.slotSymbols[i] = [];
-            for (let j = 0; j < 14; j++) { // 3 rows
+            for (let j = 0; j < 14  ; j++) { // 3 rows
                 let symbolKey = this.getRandomSymbolKey(); // Get a random symbol key
                 let slot = new Symbols(scene, symbolKey, { x: i, y: j }, reelContainer);
                 slot.symbol.setMask(new Phaser.Display.Masks.GeometryMask(scene, this.slotMask));
@@ -81,6 +83,9 @@ export class Slots extends Phaser.GameObjects.Container {
             
             this.add(reelContainer); 
         }
+        this.scene.events.on("bonusStateChanged", (isOpen: boolean) => {
+            this.handleBonusStateChange(isOpen);
+        });
     }
 
     getFilteredSymbolKeys(): string[] {
@@ -146,12 +151,12 @@ export class Slots extends Phaser.GameObjects.Container {
         }
         const reel = this.reelContainers[reelIndex];
         // 1. Calculate spin distance for initial spin
-        const spinDistance = this.spacingY * 10; // Adjust this value for desired spin amount 
+        const spinDistance = this.spacingY * 9; // Adjust this value for desired spin amount 
         // reel.y -= 1;
         this.reelTweens[reelIndex] = this.scene.tweens.add({
             targets: reel,
             y: `+=${spinDistance}`, // Spin relative to current position
-            duration: 1000, 
+            duration: currentGameData.turboMode ? 300 : 600, 
             repeat: -1, 
             onComplete: () => {},
         });
@@ -165,14 +170,14 @@ export class Slots extends Phaser.GameObjects.Container {
 
     stopReel(reelIndex: number) {
         const reel = this.reelContainers[reelIndex];
-        const reelDelay = 200 * reelIndex;
+        const reelDelay = currentGameData.turboMode ? 1 : 200 * reelIndex;
         // Calculate target Y (ensure it's a multiple of symbolHeight)
         const targetSymbolIndex = 0; // Example: Align the first symbol 
         this.scene.tweens.add({
             targets: reel,
             delay: reelDelay,
             y: targetSymbolIndex, // Animate relative to the current position
-            duration: 1200,
+            duration: currentGameData.turboMode ? 300 : 600,
             ease: 'Linear',
             onComplete: () => {
                 if (this.reelTweens[reelIndex]) {
@@ -191,6 +196,36 @@ export class Slots extends Phaser.GameObjects.Container {
         for (let j = 0; j < this.slotSymbols[reelIndex].length; j++) {
             this.slotSymbols[reelIndex][j].endTween();
          }
+    }
+
+    immediateStopReel() {
+        // Stop all existing tweens
+        for (let i = 0; i < this.reelContainers.length; i++) {
+            if (this.reelTweens[i]) {
+                this.reelTweens[i].stop();
+            }
+            
+            // Immediately set final positions
+            const reel = this.reelContainers[i];
+            const targetSymbolIndex = 0;
+            reel.y = targetSymbolIndex;
+        
+            // Stop symbol animations and set final symbols
+            for (let j = 0; j < this.slotSymbols[i].length; j++) {
+                this.slotSymbols[i][j].endTween();
+            }
+        }
+        
+        // Clear connection timeout if it exists
+        if (this.connectionTimeout) {
+            this.connectionTimeout.remove(false);
+        }
+        
+        // Set moveSlots to false
+        this.moveSlots = false;
+        
+        // Play win animations immediately
+        this.playWinAnimations();
     }
 
     showDisconnectionScene(){
@@ -213,6 +248,54 @@ export class Slots extends Phaser.GameObjects.Container {
                 }
             });
         });
+
+        if(ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin){
+            this.scene.events.emit("hideWiningLine")
+             // Clear any existing timer
+            if (this.freeSpinTimer) {
+                this.freeSpinTimer.remove();
+                this.freeSpinTimer = null;
+            }
+            if (currentGameData.bonusOpen) {
+                // Set flag to indicate pending freeSpin
+                this.pendingFreeSpin = true;
+            } else {
+                // Schedule the freeSpin
+                this.scheduleFreeSpinTimer();
+            }
+            // this.scene.time.delayedCall(1500, ()=>{
+            //     this.scene.events.emit("freeSpin");
+            // })
+        }
+        this.scene.events.emit("updateWin");
+    }
+
+    scheduleFreeSpinTimer(){
+        if (this.freeSpinTimer) {
+            this.freeSpinTimer.remove();
+        }
+        
+        this.freeSpinTimer = this.scene.time.delayedCall(1500, () => {
+            this.scene.events.emit("freeSpin");
+            this.pendingFreeSpin = false;
+            this.freeSpinTimer = null;
+        });
+    }
+
+    handleBonusStateChange(isOpen: boolean) {
+        if (isOpen) {
+            // Pause/remove timer if gamble opens
+            if (this.freeSpinTimer) {
+                this.freeSpinTimer.remove();
+                this.freeSpinTimer = null;
+                this.pendingFreeSpin = true;
+            }
+        } else {
+            // Resume timer if gamble closes and we have a pending freeSpin
+            if (this.pendingFreeSpin && ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin) {
+                this.scheduleFreeSpinTimer();
+            }
+        }
     }
     // winMusic
     winMusic(key: string){
