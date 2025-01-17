@@ -29,6 +29,7 @@ export class PopupManager {
         this.overlay = scene.add.rectangle(0, 0, scene.scale.width,  scene.scale.height, 0x000000, 0.7);
         this.overlay.setOrigin(0);
         this.overlay.setInteractive();
+        this.overlay.setDepth(0)
 
         //close all popup if click anywhere on the screen
         this.overlay.on("pointerdown",()=>{
@@ -58,6 +59,7 @@ export class PopupManager {
     showBonusPopup(data: any) {
         this.closeCurrentPopup();
         this.currentPopup = new BonusPopup(this.scene, data);
+        this.currentPopup.setDepth(1)
         this.popupContainer.add(this.currentPopup);
         this.popupContainer.setVisible(true);
     }

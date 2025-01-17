@@ -1,10 +1,11 @@
 import { Scene } from "phaser";
-import { Globals, ResultData, initData } from "../Globals";
+import { Globals, ResultData, currentGameData, initData } from "../Globals";
 import SoundManager from "../SoundManager";
+import { gameConfig } from "../appconfig";
 let values = initData.gameData.BonusData
 
 export class BonusPopup extends Phaser.GameObjects.Container{
-     public bonusContainer!: Phaser.GameObjects.Container
+   
        public spinContainer!: Phaser.GameObjects.Container;
        SoundManager!: SoundManager
        SceneBg!: Phaser.GameObjects.Sprite
@@ -18,22 +19,29 @@ export class BonusPopup extends Phaser.GameObjects.Container{
         spinCircle!: Phaser.GameObjects.Sprite
         spinCenter!: Phaser.GameObjects.Sprite
         startButton!: Phaser.GameObjects.Sprite
+        vikingLogo!: Phaser.GameObjects.Sprite
+        winImage!: Phaser.GameObjects.Sprite
         public canSpinBonus: boolean = true;
-    constructor(scene: Scene, data: any){
+        constructor(scene: Scene, data: any){
         super(scene);
-
+        this.setDepth(1); 
         // console.log(values, "values");
                 const { width, height } = this.scene.cameras.main;
-                this.bonusContainer = this.scene.add.container();
+              
                 this.SceneBg = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2, 'Background').setDisplaySize(width, height)
-                this.Stair = new Phaser.GameObjects.Sprite(this.scene, width/2, height/1.08, 'stairs').setDepth(0)
+                this.Stair = new Phaser.GameObjects.Sprite(this.scene, width/2, height/1.07, 'stairs').setDepth(0)
                 this.columnLeft = new Phaser.GameObjects.Sprite(this.scene, width/4.3, height/2.2, 'column').setDepth(1)
                 this.columnRight = new Phaser.GameObjects.Sprite(this.scene, width/1.31, height/2.2, 'column').setDepth(1)
                 this.roofTop = new Phaser.GameObjects.Sprite(this.scene, width/2, height * 0.11, 'roof').setDepth(2)
                 this.snow = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2.4, 'snow').setScale(0.9, 1)
-                this.spinWheelBg = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2, 'wheelBg').setScale(0.9)
+                this.vikingLogo = new Phaser.GameObjects.Sprite(this.scene, width/2, height * 0.125, "vikingLogo")
+                this.spinWheelBg = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2, 'wheelBg')
                 // Create the spin circle sprite
-                this.spinCircle = new Phaser.GameObjects.Sprite(this.scene, 0, 0, 'spinCircle');
+                this.spinCircle = new Phaser.GameObjects.Sprite(this.scene, 0, 0, 'spinCircle').setScale(1.1);
+                this.winImage = this.scene.add.sprite(gameConfig.scale.width * 0.5, gameConfig.scale.height * 0.5, "yourWin")
+                .setOrigin(0.5)
+                .setAlpha(0)
+                .setScale(0);
                  
                 // Create a container for the spin circle and numbers
                 this.spinContainer = this.scene.add.container(width / 2, height / 2.2, [this.spinCircle]);
@@ -45,10 +53,24 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                 this.spinContainer.setMask(mask);
              
                 this.spinCenter = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2.2, 'spinCenter').setScale(0.7);
-                this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, 'freeSpinStartButton').setScale(0.7).setInteractive()
-                this.bonusContainer.add([ this.SceneBg, this.roofTop, this.snow, this.Stair,  this.startButton, this.columnLeft, this.columnRight, this.spinWheelBg, this.spinCircle, this.spinCenter]);
+                if(ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin){
+                    this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, '').setScale(0.7).setInteractive()
+                    this.scene.time.delayedCall(3000, ()=>{
+                        this.startButton.on("pointerdown", ()=>{
+                            if (this.canSpinBonus) {
+                                 if(ResultData.gameData.BonusStopIndex){
+                                    // this.startButton.setTexture("")
+                                    this.spinWheel(ResultData.gameData.BonusStopIndex);
+                                 }
+                            }
+                        })
+                    })
+                }else{
+                    this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, 'freeSpinStartButton').setScale(0.7).setInteractive()
+                }
+                this.add([ this.SceneBg, this.roofTop, this.snow, this.Stair,  this.startButton, this.columnLeft, this.columnRight, this.vikingLogo, this.spinWheelBg, this.spinCircle, this.spinCenter]);
                 this.spinContainer = this.scene.add.container(width / 2, height / 2.2, [this.spinCircle]);
-             
+                this.add([this.spinContainer])
                
                 let segments = initData.gameData.BonusData.length;
                 let anglePerSegment = 360 / segments;
@@ -57,13 +79,29 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                 for(let i=0; i< segments; i++){
                     let startAngle = Phaser.Math.DegToRad(i * anglePerSegment);
                     let endAngle = Phaser.Math.DegToRad((i + 1) * anglePerSegment);
+                    let midAngle = (startAngle + endAngle)/2;
                     // this.spinCircle.slice(0, 0, 200, startAngle, endAngle, false);
-                    let text = this.scene.add.text(0, 0, initData.gameData.BonusData[i], { font: "20px Arial", color: "#fff" });
+                    let bonusValue = Number(initData.gameData.BonusData[i]);
+                    let betValue = Number(initData.gameData.Bets[currentGameData.currentBetIndex]);
+                    let betAmount = (bonusValue * betValue).toFixed(3);
+                    
+                    let text = this.scene.add.text(0, 0, betAmount, { font: "27px", color: "#fff", fontFamily: "Digra" })
                     text.setOrigin(0.5);
                     text.setPosition(
                         120 * Math.cos(startAngle + (endAngle - startAngle) / 2),
                         120 * Math.sin(startAngle + (endAngle - startAngle) / 2)
                     );
+                    // Calculate rotation angle (add 90 degrees to make text face center)
+                    // Calculate rotation to make text readable from outside
+
+                    let rotationAngle = (midAngle + Math.PI/18) - 0.08;
+                    // Adjust text rotation based on position
+                    if (midAngle > 0 && midAngle < Math.PI) {
+                        // Bottom half of wheel
+                        rotationAngle += Math.PI - 0.08;
+                    }
+                    text.setRotation(rotationAngle);
+
                     this.spinContainer.add(text);
                 }
                 this.spinContainer.angle = 0;
@@ -78,7 +116,8 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                          // }
                          // Pass the index you want the wheel to stop at
                     }
-            })
+                })
+                this.add(this.winImage)
     }
 
      spinWheel(targetIndex: number) {
@@ -101,7 +140,7 @@ export class BonusPopup extends Phaser.GameObjects.Container{
             
             let totalRotation = randomSpins * 360 + targetAngle;  // Total rotation including full spins
             // console.log(totalRotation, "totalRotation", targetAngle) ;
-            
+
             // Spin the wheel
             this.scene.tweens.add({
                 targets: this.spinContainer,
@@ -119,15 +158,45 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                 onComplete: () => {
                     spinSound.rate(0.5);
                     spinSound.stop();
-        
+           
                     this.startButton.setInteractive();
                     this.startButton.setTexture("freeSpinStartButton");
-                    
-                    setTimeout(() => {
-                        this.scene.events.emit("bonusStateChanged", false);
-                        this.scene.events.emit("closePopup")
-                        // Globals.SceneHandler?.removeScene("BonusScene");
-                    }, 2000);
+           
+                    // Add new animation sequence for winImage
+                    this.scene.tweens.add({
+                        targets: this.winImage,
+                        scale: { from: 0, to: 2 },    // Scale from 0 to 1
+                        alpha: { from: 0, to: 1 },    // Fade in
+                        duration: 500,                 // Duration of the animation
+                        ease: 'Back.easeOut',         // Use a bouncy ease
+                        onComplete: () => {
+                            // Optional: Add a small bounce effect after appearing
+                            this.scene.tweens.add({
+                                targets: this.winImage,
+                                scale: 2,            // Slightly larger
+                                duration: 100,
+                                yoyo: true,            // Go back to original scale
+                                ease: 'Sine.easeInOut',
+                                onComplete: () => {
+                                    // Start the fade out after a delay
+                                    this.scene.time.delayedCall(2000, () => {
+                                        this.scene.tweens.add({
+                                            targets: this.winImage,
+                                            scale: 0,
+                                            alpha: 0,
+                                            duration: 300,
+                                            ease: 'Back.easeIn',
+                                            onComplete: () => {
+                                                currentGameData.bonusOpen = false
+                                                this.scene.events.emit("bonusStateChanged", false);
+                                                this.scene.events.emit("closePopup");
+                                            }
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
                 }
             });
         }

@@ -26,6 +26,7 @@ export default class MainScene extends Scene {
     // uiPopups!: UiPopups;
     lineSymbols!: LineSymbols
     onSpinSound!: Phaser.Sound.BaseSound
+    vikingLogo!: Phaser.GameObjects.Sprite
     private mainContainer!: Phaser.GameObjects.Container;
     startButton!: Phaser.GameObjects.Sprite;
 
@@ -51,8 +52,9 @@ export default class MainScene extends Scene {
         this.columnleft = new Phaser.GameObjects.Sprite(this, width/4.3, height/2.2, 'column').setDepth(1)
         this.columnRight = new Phaser.GameObjects.Sprite(this, width/1.31, height/2.2, 'column').setDepth(1)
         this.snow = new Phaser.GameObjects.Sprite(this, width/2, height/2.4, 'snow')
+        this.vikingLogo = new Phaser.GameObjects.Sprite(this, width/2, height * 0.13, "vikingLogo").setScale(1.1)
         this.reelBg.setDisplaySize(913, 570)
-        this.mainContainer.add([ this.backgroundImage, this.roofTop, this.snow, this.stairs, this.reelBg, this.columnleft, this.columnRight])
+        this.mainContainer.add([ this.backgroundImage, this.roofTop, this.snow, this.stairs, this.vikingLogo, this.reelBg, this.columnleft, this.columnRight])
         this.soundManager.playSound("backgroundMusic")
 
         // Initialize UI Container
@@ -127,8 +129,8 @@ export default class MainScene extends Scene {
                 // this.uiContainer.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
                 const freeSpinCount = ResultData.gameData.freeSpins.count;
                 if (freeSpinCount >= 1) {
-                    this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
-                    this.uiContainer.freeSpininit(freeSpinCount)
+                    // this.freeSpinPopup(freeSpinCount, 'freeSpinPopup')
+                    // this.uiContainer.freeSpininit(freeSpinCount)
                     this.tweens.add({
                         targets: this.uiContainer.freeSpinText,
                         scaleX: 1.3, 
@@ -140,7 +142,7 @@ export default class MainScene extends Scene {
                     });
                 } else {
                     // If count is 1 or less, ensure text is scaled normally
-                    this.uiContainer.freeSpininit(freeSpinCount)
+                    // this.uiContainer.freeSpininit(freeSpinCount)
                 }
                 // Check if freeSpinCount is greater than 1
                 if (winAmount >= 10 * betValue && winAmount < 15 * betValue) {
@@ -211,7 +213,7 @@ export default class MainScene extends Scene {
                     freeText.destroy();
                     winSprite.destroy();
                     this.startButton.destroy();
-                    Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
+                    Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: initData.gameData.Lines.length, spins: 1 });
                     currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
                     // this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
                     this.onSpinCallBack();

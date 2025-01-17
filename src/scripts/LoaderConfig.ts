@@ -96,6 +96,10 @@ export const LoaderConfig = {
     turboSpin27: "src/sprites/turboSpin27.png",
     turboSpin28: "src/sprites/turboSpin28.png",
     turboSpin29: "src/sprites/turboSpin29.png",
+
+    //Logo 
+    vikingLogo: "src/sprites/vikingLogo.png",
+    yourWin: "src/sprites/YouWin.png",
     
     slots3_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots3_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",

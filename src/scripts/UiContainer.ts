@@ -196,7 +196,6 @@ export class UiContainer extends Phaser.GameObjects.Container {
      * @description this method is used for creating and spin button and on button click the a SPIn emit will be triggered to socket and will deduct the amout according to the bet
      */
     spinBtnInit(spinCallBack: () => void) {
-        
         this.spinBtn = new Phaser.GameObjects.Sprite(this.scene, 0, 0, "spinBtn");
         this.spinBtn = this.createButton('spinBtn', gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1, () => {
             if(ResultData.playerData.Balance < initData.gameData.Bets[currentGameData.currentBetIndex]){
@@ -329,25 +328,23 @@ export class UiContainer extends Phaser.GameObjects.Container {
             this.scene.textures.get("autoSpin")
         ]
         this.autoBetBtn = new InteractiveBtn(this.scene, autoPlay, ()=>{
+            currentGameData.isAutoSpin = !currentGameData.isAutoSpin
             if(this.isSpinning){
                 this.isSpinning = false
-                currentGameData.isAutoSpin = !currentGameData.isAutoSpin
                 return
             }else{
                 this.buttonMusic("buttonpressed")
-                currentGameData.isAutoSpin = !currentGameData.isAutoSpin
                 this.freeSpinStart(spinCallBack)
             }
         }, 7, true);
         // const autoPlayText = this.scene.add.text(0, 0, "Auto\nPlay",{fontFamily: "Deutsch", fontSize: "28px", color:"#ffffff", align:"center"}).setOrigin(0.5)
         // this.autoBetBtn.setScale(0.9)
-
-
         container.add([this.autoBetBtn]);
 
     }
 
     freeSpinStart(spinCallBack: () => void){
+        console.error("freeSpinStart");
         currentGameData.bonusOpen = false
         this.isSpinning = true;
         this.onSpin(true)
@@ -463,24 +460,24 @@ export class UiContainer extends Phaser.GameObjects.Container {
      * @method freeSpininit 
      * @description this method is used for showing the number of freeSpin value at the top of reels
      */
-    freeSpininit(freeSpinNumber: number){
-        if(freeSpinNumber == 0){
-            if(this.freeSpinBgImg){
-                this.freeSpinBgImg.destroy();
-                this.freeSpinText.destroy()
-                this.freeSpinContainer.destroy();
-            }   
-        }
-        if(freeSpinNumber >= 1){
-            // this.freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
-            // const freeSpinBg = this.scene.add.sprite(this.freeSpinContainer.x, this.freeSpinContainer.y, "").setScale(0.8, 0.5);
-            // const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
-            // this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
-            // this.freeSpinBgImg = freeSpinBg
-        }else{
+    // freeSpininit(freeSpinNumber: number){
+    //     if(freeSpinNumber == 0){
+    //         if(this.freeSpinBgImg){
+    //             this.freeSpinBgImg.destroy();
+    //             this.freeSpinText.destroy()
+    //             this.freeSpinContainer.destroy();
+    //         }   
+    //     }
+    //     if(freeSpinNumber >= 1){
+    //         // this.freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
+    //         // const freeSpinBg = this.scene.add.sprite(this.freeSpinContainer.x, this.freeSpinContainer.y, "").setScale(0.8, 0.5);
+    //         // const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
+    //         // this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
+    //         // this.freeSpinBgImg = freeSpinBg
+    //     }else{
            
-        }
-    }
+    //     }
+    // }
     /**
      * @method startSpinRecursion
      * @param spinCallBack 
@@ -654,21 +651,14 @@ export class UiContainer extends Phaser.GameObjects.Container {
                 this.currentWiningText.updateLabelText(winendValue.toFixed(3).toString());
             }
         });
-        // this.currentBalance.updateLabelText(ResultData.playerData.Balance.toFixed(2))
-        if(ResultData.playerData.currentWining > 0){
-            // this.spinText.updateLabelText(`You Won ${ResultData.playerData.currentWining.toFixed(3)}!`)
-        }else{
-            // this.spinText.updateLabelText("Better Luck Next Time")
-            if(ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin){
-                this.scene.events.emit("freeSpin")
-            }
-        }
+       
         if (ResultData.gameData.isBonus) {
             // if(this.isAutoSpinning){
             //     this.autoBetBtn.emit('pointerdown'); 
             //     this.autoBetBtn.emit('pointerup');
             // }
             currentGameData.bonusOpen = true
+            this.scene.events.emit("bonusStateChanged", true);
             this.popupManager.showBonusPopup({})
             // Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
         }  
