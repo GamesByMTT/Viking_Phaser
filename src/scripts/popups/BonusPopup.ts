@@ -5,7 +5,7 @@ import { gameConfig } from "../appconfig";
 let values = initData.gameData.BonusData
 
 export class BonusPopup extends Phaser.GameObjects.Container{
-   
+        private onCloseCallback?: () => void;
        public spinContainer!: Phaser.GameObjects.Container;
        SoundManager!: SoundManager
        SceneBg!: Phaser.GameObjects.Sprite
@@ -22,9 +22,10 @@ export class BonusPopup extends Phaser.GameObjects.Container{
         vikingLogo!: Phaser.GameObjects.Sprite
         winImage!: Phaser.GameObjects.Sprite
         public canSpinBonus: boolean = true;
-        constructor(scene: Scene, data: any){
+        constructor(scene: Scene, config: { onClose?: () => void }){
         super(scene);
         this.setDepth(1); 
+        this.onCloseCallback = config.onClose;
         // console.log(values, "values");
                 const { width, height } = this.scene.cameras.main;
               
@@ -54,16 +55,14 @@ export class BonusPopup extends Phaser.GameObjects.Container{
              
                 this.spinCenter = new Phaser.GameObjects.Sprite(this.scene, width/2, height/2.2, 'spinCenter').setScale(0.7);
                 if(ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin){
-                    this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, '').setScale(0.7).setInteractive()
+                    this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, 'hideFreeSpin').setScale(0.7).setInteractive()
                     this.scene.time.delayedCall(3000, ()=>{
-                        this.startButton.on("pointerdown", ()=>{
                             if (this.canSpinBonus) {
                                  if(ResultData.gameData.BonusStopIndex){
                                     // this.startButton.setTexture("")
                                     this.spinWheel(ResultData.gameData.BonusStopIndex);
                                  }
                             }
-                        })
                     })
                 }else{
                     this.startButton = new Phaser.GameObjects.Sprite (this.scene, width/2, height/1.15, 'freeSpinStartButton').setScale(0.7).setInteractive()
@@ -158,9 +157,10 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                 onComplete: () => {
                     spinSound.rate(0.5);
                     spinSound.stop();
-           
-                    this.startButton.setInteractive();
-                    this.startButton.setTexture("freeSpinStartButton");
+                    if(!currentGameData.isAutoSpin){
+                        this.startButton.setInteractive();
+                        this.startButton.setTexture("freeSpinStartButton");
+                    }
            
                     // Add new animation sequence for winImage
                     this.scene.tweens.add({
@@ -188,7 +188,10 @@ export class BonusPopup extends Phaser.GameObjects.Container{
                                             ease: 'Back.easeIn',
                                             onComplete: () => {
                                                 currentGameData.bonusOpen = false
-                                                this.scene.events.emit("bonusStateChanged", false);
+                                                // this.scene.events.emit("bonusStateChanged", false);
+                                                if (this.onCloseCallback) {
+                                                    this.onCloseCallback();
+                                                }
                                                 this.scene.events.emit("closePopup");
                                             }
                                         });

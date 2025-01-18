@@ -263,7 +263,7 @@ export class Slots extends Phaser.GameObjects.Container {
                 // Set flag to indicate pending freeSpin
                 this.pendingFreeSpin = true;
             } else {
-                this.scene.time.delayedCall(hasWinningSymbols ? 4000 : 3000, () => {
+                this.scene.time.delayedCall(hasWinningSymbols ? 4000 : 2000, () => {
                     this.scheduleFreeSpinTimer();
                 });
             }
@@ -288,23 +288,26 @@ export class Slots extends Phaser.GameObjects.Container {
             this.freeSpinTimer.remove();
         }
         
-        this.freeSpinTimer = this.scene.time.delayedCall(3000, () => {
-            this.scene.events.emit("freeSpin");
-            this.pendingFreeSpin = false;
-            this.freeSpinTimer = null;
+        this.freeSpinTimer = this.scene.time.delayedCall(2000, () => {
+            if (!currentGameData.bonusOpen) {  // Only proceed if bonus isn't open
+                this.scene.events.emit("freeSpin");
+                this.pendingFreeSpin = false;
+                this.freeSpinTimer = null;
+            }
         });
     }
 
     private handleBonusStateChange(isOpen: boolean) {
+
         if (isOpen) {
-            // Pause/remove timer if gamble opens
+            // Pause/remove timer if bonus opens
             if (this.freeSpinTimer) {
                 this.freeSpinTimer.remove();
                 this.freeSpinTimer = null;
-                this.pendingFreeSpin = true;
             }
+            this.pendingFreeSpin = true;
         } else {
-            // Resume timer if gamble closes and we have a pending freeSpin
+            // Resume timer if bonus closes and we have a pending freeSpin
             if (this.pendingFreeSpin && (ResultData.gameData.freeSpins.count > 0 || currentGameData.isAutoSpin)) {
                 this.scheduleFreeSpinTimer();
             }

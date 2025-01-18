@@ -56,12 +56,13 @@ export class PopupManager {
         this.popupContainer.setVisible(true);
     }
 
-    showBonusPopup(data: any) {
+    showBonusPopup(config: { onClose?: () => void }) {
         this.closeCurrentPopup();
-        this.currentPopup = new BonusPopup(this.scene, data);
+        this.currentPopup = new BonusPopup(this.scene, { onClose: config.onClose });
         this.currentPopup.setDepth(1)
         this.popupContainer.add(this.currentPopup);
         this.popupContainer.setVisible(true);
+        
     }
 
     // showDisconnectionPopup(data: any){

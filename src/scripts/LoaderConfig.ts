@@ -100,6 +100,7 @@ export const LoaderConfig = {
     //Logo 
     vikingLogo: "src/sprites/vikingLogo.png",
     yourWin: "src/sprites/YouWin.png",
+    hideFreeSpin: "src/sprites/freeSpinInvisible.png",
     
     slots3_0 :  "/src/sprites/Symbols/runeOthala/RuneOthala 01.png",
     slots3_1 :  "/src/sprites/Symbols/runeOthala/RuneOthala 02.png",

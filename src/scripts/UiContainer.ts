@@ -205,9 +205,8 @@ export class UiContainer extends Phaser.GameObjects.Container {
             // this.spinButtonSound.play();
                 this.bnuttonMusic("spinButton");
             // checking if autoSpining is working or not if it is auto Spining then stop it
-            if(this.isAutoSpinning){
-                this.autoBetBtn.emit('pointerdown'); // Simulate the pointerdown event
-                this.autoBetBtn.emit('pointerup'); // Simulate the pointerup event (if needed)
+            if(currentGameData.isAutoSpin){
+                currentGameData.isAutoSpin = !currentGameData.isAutoSpin
                 return;
             }
             const balance = parseFloat(this.currentBalanceText.text);
@@ -235,15 +234,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
                 scaleY: 1.1,
                 duration: 100,
                 onComplete: () => {
-                    // Send message and update the balance
-                    // Globals.Socket?.sendMessage("SPIN", { currentBet: currentGameData.currentBetIndex, currentLines: 20, spins: 1 });
                     this.startSpining(spinCallBack)
-                    // currentGameData.currentBalance -= initData.gameData.Bets[currentGameData.currentBetIndex];
-                    // this.currentBalanceText.updateLabelText(currentGameData.currentBalance.toFixed(2));
-                    // Trigger the spin callback
-                    // this.onSpin(true);
-                    // spinCallBack();
-
                     // Scale back to original size 
                     this.scene.tweens.add({
                         targets: this.spinBtn,
@@ -329,7 +320,9 @@ export class UiContainer extends Phaser.GameObjects.Container {
         ]
         this.autoBetBtn = new InteractiveBtn(this.scene, autoPlay, ()=>{
             currentGameData.isAutoSpin = !currentGameData.isAutoSpin
-            if(this.isSpinning){
+            console.log(currentGameData.isAutoSpin, "currentGameData.isAutoSpin");
+            
+            if(!currentGameData.isAutoSpin){
                 this.isSpinning = false
                 return
             }else{
@@ -344,16 +337,21 @@ export class UiContainer extends Phaser.GameObjects.Container {
     }
 
     freeSpinStart(spinCallBack: () => void){
-        console.error("freeSpinStart");
         currentGameData.bonusOpen = false
-        this.isSpinning = true;
-        this.onSpin(true)
-        Globals.Socket?.sendMessage("SPIN", { 
-            currentBet: currentGameData.currentBetIndex, 
-            currentLines: initData.gameData.Lines.length, 
-            spins: 1 
-        });
-        spinCallBack();
+        if(currentGameData.isAutoSpin || ResultData.gameData.freeSpins.count > 0){
+            if(ResultData.gameData.freeSpins.count > 0){
+                
+            }
+            this.isSpinning = true;
+            this.onSpin(true)
+            Globals.Socket?.sendMessage("SPIN", { 
+                currentBet: currentGameData.currentBetIndex, 
+                currentLines: initData.gameData.Lines.length, 
+                spins: 1 
+            });
+            spinCallBack();
+        }
+        
             // Reset the flag after some time or when spin completes
         // setTimeout(() => {
         //     this.isSpinning = false;
@@ -653,15 +651,21 @@ export class UiContainer extends Phaser.GameObjects.Container {
         });
        
         if (ResultData.gameData.isBonus) {
-            // if(this.isAutoSpinning){
-            //     this.autoBetBtn.emit('pointerdown'); 
-            //     this.autoBetBtn.emit('pointerup');
-            // }
-            currentGameData.bonusOpen = true
+            currentGameData.bonusOpen = true;
             this.scene.events.emit("bonusStateChanged", true);
-            this.popupManager.showBonusPopup({})
-            // Globals.SceneHandler?.addScene('BonusScene', BonusScene, true)
-        }  
+            // this.popupManager.showBonusPopup({
+            //     onClose: () => {
+            //         currentGameData.bonusOpen = false;
+            //         this.scene.events.emit("bonusStateChanged", false);
+            //     }
+            // });
+            this.popupManager.showBonusPopup({
+                onClose: () => {
+                    currentGameData.bonusOpen = false;
+                    this.scene.events.emit("bonusStateChanged", false);
+                }
+            });
+        }
     }
 
     buttonMusic(key: string){
