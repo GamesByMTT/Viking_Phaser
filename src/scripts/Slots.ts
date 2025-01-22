@@ -27,7 +27,7 @@ export class Slots extends Phaser.GameObjects.Container {
     pendingFreeSpin: boolean = false;
     constructor(scene: Phaser.Scene, uiContainer: UiContainer, callback: () => void, SoundManager: SoundManager) {
         super(scene);
-
+        this.scene.events.on("stopImmediately", this.stopReelsImmediately, this)
         this.resultCallBack = callback;
         this.uiContainer = uiContainer;
         this.SoundManager = SoundManager
@@ -111,6 +111,7 @@ export class Slots extends Phaser.GameObjects.Container {
         return this.symbolKeys[randomIndex];
     }
     moveReel() {
+        currentGameData.stopButtonEnabled = false
         const initialYOffset = (this.slotSymbols[0][0].totalSymbol - this.slotSymbols[0][0].visibleSymbol - this.slotSymbols[0][0].startIndex) * this.spacingY;
         setTimeout(() => {
             for (let i = 0; i < this.reelContainers.length; i++) {
@@ -169,6 +170,7 @@ export class Slots extends Phaser.GameObjects.Container {
     }
 
     stopReel(reelIndex: number) {
+        if(currentGameData.stopButtonEnabled) return;
         const reel = this.reelContainers[reelIndex];
         const reelDelay = currentGameData.turboMode ? 1 : 200 * reelIndex;
         // Calculate target Y (ensure it's a multiple of symbolHeight)
@@ -198,7 +200,7 @@ export class Slots extends Phaser.GameObjects.Container {
         }
     }
 
-    immediateStopReel() {
+    stopReelsImmediately() {
         // Stop all existing tweens
         for (let i = 0; i < this.reelContainers.length; i++) {
             if (this.reelTweens[i]) {
@@ -220,7 +222,7 @@ export class Slots extends Phaser.GameObjects.Container {
         if (this.connectionTimeout) {
             this.connectionTimeout.remove(false);
         }
-
+        // this.isSpinning = false;
         // Set moveSlots to false
         this.moveSlots = false;
 
@@ -263,11 +265,12 @@ export class Slots extends Phaser.GameObjects.Container {
                 // Set flag to indicate pending freeSpin
                 this.pendingFreeSpin = true;
             } else {
-                this.scene.time.delayedCall(hasWinningSymbols ? 4000 : 2000, () => {
+                this.scene.time.delayedCall(hasWinningSymbols ? 3000 : 1500, () => {
                     this.scheduleFreeSpinTimer();
                 });
             }
         }
+        this.scene.events.emit("feeSpinPopup")
         this.scene.events.emit("updateWin");
     }
 
@@ -397,6 +400,7 @@ class Symbols {
         }
         // Stop moving and start tweening the sprite's position
         this.startMoving = false;
+        this.scene.events.emit("stopButtonStateChange");
     }
 }
 

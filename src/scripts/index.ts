@@ -25,7 +25,7 @@ if(!IS_DEV){
 else{
   const data  = {
     socketUrl : "http://localhost:5001",
-    authToken : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM2OTMwMjc4LCJleHAiOjE3Mzc1MzUwNzh9.pbXIk2J7Fnl6r4xEZdiR0oBOJGYUPytBUBaDClZwU84",
+    authToken : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2ZDg1MjhmYTI3YmY5MDI0NDNlYmExZiIsInVzZXJuYW1lIjoiYXJwaXQiLCJyb2xlIjoicGxheWVyIiwiaWF0IjoxNzM3NTM2ODYwLCJleHAiOjE3MzgxNDE2NjB9.CMevBLgEpTJXK6jjxjQb2UZFXAN3iscLvH-ihRRUUA0",
   }
   Globals.Socket = new SocketManager();
   Globals.Socket.onToken(data);

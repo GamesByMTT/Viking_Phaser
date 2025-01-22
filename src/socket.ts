@@ -31,7 +31,7 @@ export class SocketManager {
    this.socket = io(this.SocketUrl, {
       auth: {
         token: this.authToken,
-        gameId: "",
+        gameId: "SL-VIK",
       },
       reconnectionAttempts: 5,
       reconnectionDelay: 15000, // Initial delay between reconnection attempts (in ms)
@@ -60,15 +60,12 @@ export class SocketManager {
             initData.UIData.symbols = data.message.UIData.paylines.symbols
             initData.gameData.BonusData = data.message.BonusData;
             ResultData.playerData.Balance = data.message.PlayerData.Balance;
-            console.log(data, "initData on Socket File");
           }   
         }
         if(data.id == "ResultData"){
               ResultData.gameData = data.message.GameData;
               ResultData.playerData = data.message.PlayerData;
               Globals.emitter?.Call("ResultData");
-              console.log(ResultData);
-              console.log(ResultData.gameData.freeSpins.count," freeSpins count");
         }
       });
     });

@@ -21,6 +21,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
     currentWiningText!: TextLabel;
     currentBalanceText!: TextLabel;
     CurrentLineText!: TextLabel;
+    freeSpinHeading!: TextLabel;
     freeSpinText!: TextLabel;
     pBtn!: Phaser.GameObjects.Sprite;
     mBtn!: Phaser.GameObjects.Sprite
@@ -39,6 +40,8 @@ export class UiContainer extends Phaser.GameObjects.Container {
     turboSprite!: Phaser.GameObjects.Sprite;
     turboMode: boolean = false
     turboAnimation: Phaser.Types.Animations.AnimationFrame[] = []
+    stopButton!: GameObjects.Sprite
+    freeSpinConatiner!: Phaser.GameObjects.Container
 
     constructor(scene: Scene, spinCallBack: () => void, soundManager: SoundManager) {
         super(scene);
@@ -49,7 +52,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
         this.maxBetInit();
         this.autoSpinBtnInit(spinCallBack);
         this.spinBtnInit(spinCallBack);
-       
+        this.stopSpinButton()
         this.lineBtnInit();
         this.winBtnInit();
         this.balanceBtnInit();
@@ -57,11 +60,14 @@ export class UiContainer extends Phaser.GameObjects.Container {
         this.settingBtnInit();
         this.infoBtnInit();
         this.exitButton();
-        this.turboButton()
+        this.turboButton();
+        this.freeSpininit();
         this.SoundManager = soundManager;
         this.scene.events.on("freeSpin", () => this.freeSpinStart(spinCallBack), this)
         this.scene.events.on("updateWin", this.updateData, this)
-        // this.freeSpininit();
+        this.scene.events.on("stopButtonStateChange", this.hideStopButton, this)
+        this.scene.events.on("feeSpinPopup", this.freeSpinPopupShow, this)
+       
         // this.vaseInit();
     }
 
@@ -165,7 +171,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
         const winPanelChild = this.scene.add.container(winPanel.x, winPanel.y)
         winPanelChild.add(this.currentWiningText);
         if(currentWining > 0){
-            console.log(currentWining, "currentWining");
+  
             this.scene.tweens.add({
                 targets:  this.currentWiningText,
                 scaleX: 1.3, 
@@ -191,7 +197,20 @@ export class UiContainer extends Phaser.GameObjects.Container {
         this.currentBalanceText = new TextLabel(this.scene, 0, 7, currentGameData.currentBalance.toFixed(3), 27, "#ffffff");
         container.add(this.currentBalanceText);
     }
-/**
+    /**
+     * @method stopSpinButton stop button functionality
+     * @description this method draw stop button when spin button is pressed
+     */
+    stopSpinButton(){
+        const container = this.scene.add.container(gameConfig.scale.width / 2, gameConfig.scale.height - this.spinBtn.height/1.1)
+        this.stopButton = this.scene.add.sprite(0, 0, "stopButton").setInteractive().setScale(0.57).setVisible(false)
+        this.stopButton.on("pointerdown", ()=>{
+            currentGameData.stopButtonEnabled = !currentGameData.stopButtonEnabled
+            this.scene.events.emit("stopImmediately")
+        })
+        container.add(this.stopButton)
+    }
+    /**
      * @method spinBtnInit Spin the reel
      * @description this method is used for creating and spin button and on button click the a SPIn emit will be triggered to socket and will deduct the amout according to the bet
      */
@@ -253,6 +272,9 @@ export class UiContainer extends Phaser.GameObjects.Container {
     }
 
     startSpining(spinCallBack: () => void){
+        if(!currentGameData.turboMode){
+            this.stopButton.setVisible(true)
+        }
         this.isSpinning = true;
         this.onSpin(true)
         Globals.Socket?.sendMessage("SPIN", { 
@@ -320,8 +342,6 @@ export class UiContainer extends Phaser.GameObjects.Container {
         ]
         this.autoBetBtn = new InteractiveBtn(this.scene, autoPlay, ()=>{
             currentGameData.isAutoSpin = !currentGameData.isAutoSpin
-            console.log(currentGameData.isAutoSpin, "currentGameData.isAutoSpin");
-            
             if(!currentGameData.isAutoSpin){
                 this.isSpinning = false
                 return
@@ -405,6 +425,42 @@ export class UiContainer extends Phaser.GameObjects.Container {
     //     ).setDepth(0);
     // }
 
+    hideStopButton(){
+        setTimeout(() => {
+            this.stopButton.setVisible(false)
+        }, 500);
+    }
+
+    freeSpinPopupShow(){
+        this.freeSpinText.updateLabelText((ResultData.gameData.freeSpins.count).toString())
+        if(ResultData.gameData.freeSpins.count > 0){
+            if(currentGameData.freeSpinPopup){
+
+            }else{
+                currentGameData.freeSpinPopup = true
+                this.freeSpinConatiner.setVisible(true)
+                this.scene.time.delayedCall(1000, ()=>{
+                    this.scene.tweens.add({
+                        targets: this.freeSpinConatiner,
+                        scale: {from: 1, to: 0.4},
+                        x: {from: this.freeSpinConatiner.x, to: gameConfig.scale.width * 0.1},
+                        y: {from: this.freeSpinConatiner.y, to: gameConfig.scale.height * 0.32},
+                        duration: 700,
+                        ease: "Back.easeOut"
+                    })
+                })
+                
+            }
+        }else{
+            this.scene.time.delayedCall(1000, ()=>{
+                currentGameData.freeSpinPopup = false;
+                this.freeSpinConatiner.setPosition(gameConfig.scale.width / 2, gameConfig.scale.height/2)
+                this.freeSpinConatiner.setScale(1)
+                this.freeSpinConatiner.setVisible(false);
+            })
+        }        
+    }
+
     
     lowBalancePopup(){
         // Create a semi-transparent background for the popup
@@ -458,24 +514,13 @@ export class UiContainer extends Phaser.GameObjects.Container {
      * @method freeSpininit 
      * @description this method is used for showing the number of freeSpin value at the top of reels
      */
-    // freeSpininit(freeSpinNumber: number){
-    //     if(freeSpinNumber == 0){
-    //         if(this.freeSpinBgImg){
-    //             this.freeSpinBgImg.destroy();
-    //             this.freeSpinText.destroy()
-    //             this.freeSpinContainer.destroy();
-    //         }   
-    //     }
-    //     if(freeSpinNumber >= 1){
-    //         // this.freeSpinContainer = this.scene.add.container(gameConfig.scale.width/2, gameConfig.scale.height*0.15);
-    //         // const freeSpinBg = this.scene.add.sprite(this.freeSpinContainer.x, this.freeSpinContainer.y, "").setScale(0.8, 0.5);
-    //         // const freeSpinCount = new TextLabel(this.scene, freeSpinBg.x - 20, freeSpinBg.y - 5, "Free Spin : ", 27, "#ffffff");
-    //         // this.freeSpinText = new TextLabel(this.scene, freeSpinBg.x + 55, freeSpinBg.y - 5, freeSpinNumber.toString(), 27, "#ffffff")
-    //         // this.freeSpinBgImg = freeSpinBg
-    //     }else{
-           
-    //     }
-    // }
+    freeSpininit(){
+        this.freeSpinConatiner = this.scene.add.container(gameConfig.scale.width / 2, gameConfig.scale.height/2).setVisible(false);
+        this.freeSpinBgImg = this.scene.add.sprite(0, 0, "logoutPop").setOrigin(0.5)
+        this.freeSpinHeading = new TextLabel(this.scene, 0, -100, "Free Spin", 60, "#ffffff").setOrigin(0.5)
+        this.freeSpinText = new TextLabel(this.scene, 0, 50, (ResultData.gameData.freeSpins.count).toString(), 60, "#FFFFFF").setOrigin(0.5)
+        this.freeSpinConatiner.add([this.freeSpinBgImg, this.freeSpinHeading, this.freeSpinText])
+    }
     /**
      * @method startSpinRecursion
      * @param spinCallBack 
@@ -540,7 +585,7 @@ export class UiContainer extends Phaser.GameObjects.Container {
 
     onSpin(spin: boolean) {
         // Handle spin functionality
-        if(this.isAutoSpinning){
+        if(this.isAutoSpinning || ResultData.gameData.freeSpins.count > 0){
             return
         }
         if(spin){

@@ -146,8 +146,8 @@ export default class MainScene extends Scene {
                 }
                 // Check if freeSpinCount is greater than 1
                 if (winAmount >= 10 * betValue && winAmount < 15 * betValue) {
-                 // Big Win Popup
-                 this.showWinPopup(winAmount, 'bigWinPopup')
+                    // Big Win Popup
+                    this.showWinPopup(winAmount, 'bigWinPopup')
                 } else if (winAmount >= 15 * betValue && winAmount < 20 * betValue) {
                     // HugeWinPopup
                     this.showWinPopup(winAmount, 'hugeWinPopup')
@@ -236,45 +236,68 @@ export default class MainScene extends Scene {
      * @param spriteKey The key of the sprite to display in the popup
      */
     showWinPopup(winAmount: number, spriteKey: string) {
-
+        console.error(winAmount, "winAmount");
+        let isDestroyed = false;
+        
+        const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
+        .setOrigin(0, 0)
+        .setDepth(12) // Set depth to be below the popup but above game elements
+        .setInteractive() // Make it interactive to block all input events
+       
         // Create the sprite based on the key provided
         const winSprite = this.add.sprite(this.cameras.main.centerX, this.cameras.main.centerY - 50, spriteKey).setDepth(15);
         // Create the text object to display win amount
         const winText = this.add.text(this.cameras.main.centerX, this.cameras.main.centerY, '0', {
+            fontFamily: "Digra",
             font: '50px',
             color: '#FFFFFF'
         }).setDepth(15).setOrigin(0.5);
         // Create the popup background
-        const inputOverlay = this.add.rectangle(0, 0, this.cameras.main.width, this.cameras.main.height, 0x000000, 0.5)
-        .setOrigin(0, 0)
-        .setDepth(15) // Set depth to be below the popup but above game elements
-        .setInteractive() // Make it interactive to block all input events
-        inputOverlay.on('pointerdown', (pointer: Phaser.Input.Pointer) => {
-            // Prevent default action on pointerdown to block interaction
-            // pointer.event.stopPropagation();
-                inputOverlay.destroy();
-                winText.destroy();
-                winSprite.destroy();
-        });
         
-        // Tween to animate the text increment from 0 to winAmount
-        this.tweens.addCounter({
-            from: 0,
-            to: winAmount,
-            duration: 1000, // Duration of the animation in milliseconds
-            onUpdate: (tween) => {
-                const value = Math.floor(tween.getValue());
-                winText.setText(value.toString());
+        let tweenObject = { value: 0 };  // Create an object to tween
+        let autoCloseTimer: Phaser.Time.TimerEvent;
+        let currentTween: Phaser.Tweens.Tween;
+        currentTween = this.tweens.add({
+            targets: tweenObject,
+            value: winAmount,
+            duration: 500,
+            ease: 'Linear',
+            onUpdate: () => {
+                if (!isDestroyed && winText && winText.active) {
+                    winText.setText(tweenObject.value.toFixed(3).toString());
+                }
             },
             onComplete: () => {
-                // Automatically close the popup after a few seconds
-                this.time.delayedCall(4000, () => {
-                    inputOverlay.destroy();
-                    winText.destroy();
-                    winSprite.destroy();
-                });
+                if (!isDestroyed) {
+                    autoCloseTimer = this.time.delayedCall(4000, () => {
+                        cleanupPopup();
+                    });
+                }
             }
         });
+        const cleanupPopup = () => {
+            if (isDestroyed) return;
+            isDestroyed = true;
+            // Stop the tween if it exists and is active
+            if (currentTween && currentTween.isPlaying()) {
+                currentTween.stop();
+            }
+            // Clear the auto-close timer if it exists
+            if (autoCloseTimer) {
+                autoCloseTimer.remove();
+            }
+            // Destroy game objects if they still exist
+            if (inputOverlay && inputOverlay.active) {
+                inputOverlay.destroy();
+            }
+            if (winText && winText.active) {
+                winText.destroy();
+            }
+            if (winSprite && winSprite.active) {
+                winSprite.destroy();
+            }
+        };
+        inputOverlay.on('pointerdown', cleanupPopup);
     }
 
    
